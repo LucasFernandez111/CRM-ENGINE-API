@@ -1,20 +1,22 @@
-import { Controller, Get, Redirect, Query } from '@nestjs/common';
+import { Controller, Get, Res, Req, UseGuards } from '@nestjs/common';
 import { GoogleAuthService } from './google-auth/google-auth.service';
+import { GoogleOauthGuard } from './guards/google-oauth.guard';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly googleAuthService: GoogleAuthService) {}
 
   @Get('google')
-  @Redirect()
-  googleAuth() {
-    const authUrl: string = this.googleAuthService.getAuthUrl();
-    return { url: authUrl, statusCode: 302 };
+  @UseGuards(GoogleOauthGuard)
+  async googleAuth(@Req() req) {
+    // Passport redirige automáticamente a Google
   }
 
   @Get('google/callback')
-  async googleAuthRedirect(@Query('code') code: string) {
-    const { tokens } = await this.googleAuthService.getTokens(code);
-    return { tokens };
+  @UseGuards(GoogleOauthGuard)
+  googleAuthCallback(@Req() req, @Res() res: Response) {
+    // Aquí puedes manejar el resultado de la autenticación
+    return res.send({ user: req.user });
   }
 }
