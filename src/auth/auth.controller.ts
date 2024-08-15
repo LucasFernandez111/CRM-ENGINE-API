@@ -9,14 +9,23 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleOauthGuard)
-  async googleAuth(@Req() req) {
-    // Passport redirige automáticamente a Google
-  }
+  async googleAuth(@Req() req) {}
 
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
   googleAuthCallback(@Req() req, @Res() res: Response) {
     // Aquí puedes manejar el resultado de la autenticación
-    return res.send({ user: req.user });
+
+    res.cookie('access_token', req.user.accessToken, {
+      httpOnly: true,
+      secure: false,
+      path: '/',
+    });
+    res.cookie('refresh_token', req.user.refreshToken, {
+      httpOnly: true,
+      secure: false,
+    });
+
+    return res.redirect('/users/sheet');
   }
 }
