@@ -18,14 +18,11 @@ export class AuthController {
 
     res.cookie('access_token', req.user.accessToken, {
       httpOnly: true,
-      secure: false,
-      path: '/',
-    });
-    res.cookie('refresh_token', req.user.refreshToken, {
-      httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 100 * 60 * 1000,
     });
 
-    return res.redirect('/users/sheet');
+    return res.redirect('http://localhost:3038/');
   }
 }
