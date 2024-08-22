@@ -1,11 +1,9 @@
 import {
-  HttpCode,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { google } from 'googleapis';
-import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 
 @Injectable()
 export class UsersService {
