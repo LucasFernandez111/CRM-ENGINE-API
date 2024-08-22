@@ -15,14 +15,17 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   googleAuthCallback(@Req() req, @Res() res: Response) {
     // Aquí puedes manejar el resultado de la autenticación
+    const { accessToken } = req.user;
 
-    res.cookie('access_token', req.user.accessToken, {
+    res.cookie('access_token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 100 * 60 * 1000,
     });
 
-    return res.redirect('http://localhost:3038/');
+    return res.redirect(
+      `http://localhost:3038/auth/callback?token=${accessToken}`,
+    );
   }
 }
