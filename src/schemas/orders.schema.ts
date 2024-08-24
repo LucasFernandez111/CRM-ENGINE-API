@@ -4,13 +4,14 @@ import { Document, HydratedDocument } from 'mongoose';
 export type OrdersDocument = HydratedDocument<Orders>;
 @Schema({
   timestamps: true,
+  versionKey: false,
 })
 export class Orders extends Document {
   @Prop({
     unique: true,
     required: true,
   })
-  idToken: string;
+  id_token: string;
 
   @Prop({ required: true })
   order: number;
