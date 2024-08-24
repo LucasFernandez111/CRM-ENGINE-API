@@ -10,6 +10,7 @@ export class Orders extends Document {
   @Prop({
     unique: true,
     required: true,
+    trim: true,
   })
   id_token: string;
 
