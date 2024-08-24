@@ -11,7 +11,8 @@ export class UsersDbService {
 
   async createUser(user: Users): Promise<Users> {
     try {
-      return await this.userModel.create(user);
+      const userCreated = await this.userModel.create(user);
+      return userCreated;
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error creating user',
