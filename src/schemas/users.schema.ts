@@ -19,6 +19,9 @@ export class Users {
 
   @Prop({ trim: true })
   email: string;
+
+  @Prop({ trim: true })
+  sheet?: string;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(Users); //Creacion de objeto para ser manipulado
