@@ -49,7 +49,10 @@ export class UsersService {
         },
       });
     } catch (error) {
-      return new InternalServerErrorException(error);
+      throw new InternalServerErrorException({
+        message: 'Error creating order',
+        error: error.message,
+      });
     }
   }
 }
