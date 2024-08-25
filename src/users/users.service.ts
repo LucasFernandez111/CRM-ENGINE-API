@@ -3,11 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 
 @Injectable()
 export class UsersService {
-  public oauth2Client;
+  public oauth2Client: OAuth2Client;
 
   constructor() {
     this.oauth2Client = new google.auth.OAuth2();

@@ -24,6 +24,7 @@ export class AccessTokenGuard implements CanActivate {
       authClient.setCredentials({ access_token: accessToken });
 
       const tokenInfo = await authClient.getTokenInfo(accessToken);
+
       if (tokenInfo.expiry_date && tokenInfo.expiry_date < Date.now()) {
         console.log('Access token has expired. Refreshing token...');
 
@@ -32,10 +33,6 @@ export class AccessTokenGuard implements CanActivate {
 
         request.cookies['access_token'] = tokens.credentials.access_token;
       }
-
-      request.user = {
-        accessToken: authClient.credentials.access_token,
-      };
 
       return true;
     } catch (error) {
