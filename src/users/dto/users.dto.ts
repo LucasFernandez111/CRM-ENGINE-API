@@ -15,4 +15,16 @@ export class UsersDto {
   @IsOptional()
   @IsString()
   sheet?: string;
+
+  @IsOptional()
+  @IsString()
+  company?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
 }

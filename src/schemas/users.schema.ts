@@ -15,6 +15,9 @@ export class Users {
   id_token: string;
 
   @Prop({ trim: true })
+  profilePicUrl: string;
+
+  @Prop({ trim: true })
   name: string;
 
   @Prop({ trim: true })
@@ -22,6 +25,15 @@ export class Users {
 
   @Prop({ trim: true })
   sheet?: string;
+
+  @Prop({ trim: true })
+  company?: string;
+
+  @Prop({ trim: true })
+  phone?: string;
+
+  @Prop({ trim: true })
+  address?: string;
 }
 
 export const UsersSchema = SchemaFactory.createForClass(Users); //Creacion de objeto para ser manipulado

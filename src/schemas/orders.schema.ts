@@ -8,7 +8,6 @@ export type OrdersDocument = HydratedDocument<Orders>;
 })
 export class Orders extends Document {
   @Prop({
-    unique: true,
     required: true,
     trim: true,
   })
@@ -29,11 +28,8 @@ export class Orders extends Document {
   @Prop({ required: true })
   quantity: number;
 
-  @Prop({ required: true })
-  food: string;
-
   @Prop()
-  description?: string;
+  description: string;
 
   @Prop({ required: true })
   price: number;
