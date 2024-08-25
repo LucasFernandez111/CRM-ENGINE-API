@@ -6,10 +6,6 @@ export class CreateOrderDto {
   id_token: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  order: number;
-
-  @IsNotEmpty()
   @IsString()
   name: string;
 
@@ -25,13 +21,9 @@ export class CreateOrderDto {
   @IsNumber()
   quantity: number;
 
-  @IsNotEmpty()
-  @IsString()
-  food: string;
-
   @IsOptional()
   @IsString()
-  description?: string;
+  description: string;
 
   @IsNotEmpty()
   @IsNumber()
