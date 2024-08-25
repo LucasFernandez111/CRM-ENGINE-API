@@ -15,9 +15,15 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   googleAuthCallback(@Req() req, @Res() res: Response) {
     // Aquí puedes manejar el resultado de la autenticación
-    const { accessToken } = req.user;
+    const { accessToken, id_token } = req.user;
 
     res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 100 * 60 * 1000,
+    });
+    res.cookie('id_token', id_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
