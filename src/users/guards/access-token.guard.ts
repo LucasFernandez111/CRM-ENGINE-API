@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UsersService } from '../users.service';
+import { UsersService } from '../user.service';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -13,7 +13,6 @@ export class AccessTokenGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const accessToken = request.cookies['access_token'];
-
     if (!accessToken) {
       throw new UnauthorizedException('No access token found.');
     }
@@ -26,7 +25,7 @@ export class AccessTokenGuard implements CanActivate {
       const tokenInfo = await authClient.getTokenInfo(accessToken);
 
       if (tokenInfo.expiry_date && tokenInfo.expiry_date < Date.now()) {
-        console.log('Access token has expired. Refreshing token...');
+        console.warn('Access token has expired. Refreshing token...');
 
         const tokens = await authClient.refreshAccessToken();
         authClient.setCredentials(tokens.credentials);
