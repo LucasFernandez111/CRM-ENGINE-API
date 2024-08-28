@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Orders } from 'src/schemas/orders.schema';
+import { Orders } from '../schemas/orders.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class OrdersService {
@@ -15,6 +16,9 @@ export class OrdersService {
     @InjectModel(Orders.name) private readonly ordersModel: Model<Orders>,
   ) {}
 
+  /**
+   * Obtiene todas los pedidos de un usuario
+   */
   async getOrders(id_token: string) {
     if (!id_token) throw new BadRequestException('id_token is required');
     try {
@@ -25,7 +29,10 @@ export class OrdersService {
     }
   }
 
-  async getOrder(id_token: string, order: string) {
+  /**
+   * Obtiene un pedido de un usuario mediante el numero de orden
+   */
+  async getOrderById(id_token: string, order: string | number) {
     if (!id_token || !order)
       throw new BadRequestException('id_token or order is required');
     try {
@@ -36,21 +43,47 @@ export class OrdersService {
     }
   }
 
+  /**
+   * Obtiene las ordenes de hoy de un usuario
+   */
+  async getTodayOrders(id_token: string) {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const todayOrders = await this.ordersModel.find({
+      id_token,
+      createdAt: { $gte: new Date(today) },
+    });
+
+    return todayOrders;
+  }
+  async getRecordsByDateRange(
+    id_token: string,
+    startDate: Date,
+    endDate: Date,
+  ) {
+    const records = await this.ordersModel.find({
+      id_token,
+      createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
+    });
+    return records;
+  }
+  /**
+   *  Crea un nuevo pedido
+   */
   async createOrder(order: CreateOrderDto) {
     try {
-      const lastOrder = await this.findLastOrder(order.id_token);
+      const lastOrder = await this.getLastOrder(order.id_token);
 
       if (!lastOrder)
-        //Si no existe numero de orden inicializa en 0
+        //Si no existe numero de orden se inicializa en 0
         return this.ordersModel.create({
           ...order,
           order: 1,
         });
 
-      //Auto incrementa el numero de orden
+      //Autoincrementa el numero de orden
       const orderCreated = this.ordersModel.create({
         ...order,
-        order: lastOrder.order + 1,
+        order: lastOrder.order++,
       });
       return orderCreated;
     } catch (error) {
@@ -58,11 +91,11 @@ export class OrdersService {
     }
   }
 
-  async deleteOrder(id_token: string, order: string) {
+  async deleteOrderById(id_token: string, orderId: string) {
     try {
       const orderDeleted = await this.ordersModel.findOneAndDelete({
         id_token,
-        order,
+        orderId,
       });
       return orderDeleted;
     } catch (error) {
@@ -70,8 +103,10 @@ export class OrdersService {
     }
   }
 
-  private async findLastOrder(id_token: string) {
-    //Busca el ultimo numero de orden por el id_token y ultimo numero de orden
+  /**
+   * Busca el ultimo numero de orden de un usuario
+   */
+  private async getLastOrder(id_token: string) {
     const lastOrder = await this.ordersModel
       .findOne({ id_token })
       .sort({ order: -1 });
