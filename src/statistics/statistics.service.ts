@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+
 import { OrdersService } from 'src/orders/orders.service';
 import { Orders } from 'src/schemas/orders.schema';
 @Injectable()
@@ -6,7 +7,7 @@ export class StatisticsService {
   constructor(private readonly OrdersService: OrdersService) {}
 
   /**
-   * Obtiene la orden mas vendida mediante el top selling
+   * Obtiene el pedido mas vendido mediante todas los pedidos del usuario
    */
   async getTopSellingOrder(id_token: string): Promise<Orders> {
     try {
