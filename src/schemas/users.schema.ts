@@ -15,10 +15,10 @@ export class Users {
   id_token: string;
 
   @Prop({ trim: true })
-  profilePicUrl: string;
+  picture: string;
 
   @Prop({ trim: true })
-  name: string;
+  firstName: string;
 
   @Prop({ trim: true })
   email: string;
