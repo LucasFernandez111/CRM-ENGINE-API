@@ -60,18 +60,26 @@ export class OrdersService {
     startDate: Date,
     endDate: Date,
   ) {
+    const startOfDay = new Date(startDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(endDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
     const records = await this.ordersModel.find({
       id_token,
-      createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
     });
+
     return records;
   }
+
   /**
    *  Crea un nuevo pedido
    */
-  async createOrder(order: CreateOrderDto) {
+  async createOrder(id_token: string, order: CreateOrderDto) {
     try {
-      const lastOrder = await this.getLastOrder(order.id_token);
+      const lastOrder = await this.getLastOrder(id_token);
 
       if (!lastOrder)
         //Si no existe numero de orden se inicializa en 0
@@ -82,6 +90,7 @@ export class OrdersService {
 
       //Autoincrementa el numero de orden
       const orderCreated = this.ordersModel.create({
+        id_token,
         ...order,
         order: lastOrder.order++,
       });
