@@ -19,22 +19,6 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   /**
-   * Obtener las órdenes de hoy para el usuario autenticado.
-   *
-   * @param req - El objeto de solicitud HTTP que contiene las cookies.
-   * @returns Una lista de órdenes creadas hoy asociadas con el usuario autenticado.
-   *
-   * Este endpoint devuelve las órdenes que fueron creadas hoy para el usuario autenticado.
-   * El `id_token` se extrae de las cookies para autenticar la solicitud.
-   */
-  @Get('today')
-  async getTodayOrders(@Req() req: Request): Promise<Orders[] | []> {
-    const id_token = req.cookies['id_token'];
-    const todayOrders = await this.ordersService.getTodayOrders(id_token);
-    return todayOrders;
-  }
-
-  /**
    * Obtener órdenes basadas en un rango de fechas.
    *
    * @param startDate - La fecha de inicio del rango (formato YYYY-MM-DD).
@@ -54,12 +38,10 @@ export class OrdersController {
   ): Promise<Orders[] | []> {
     const id_token = req.cookies['id_token'];
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
     const records = await this.ordersService.getRecordsByDateRange(
       id_token,
-      start,
-      end,
+      startDate,
+      endDate,
     );
     return records;
   }
@@ -76,6 +58,7 @@ export class OrdersController {
   @Get()
   async getOrders(@Req() req: Request): Promise<Orders[] | []> {
     const id_token = req.cookies['id_token'];
+
     const orders = await this.ordersService.getOrders(id_token);
     return orders;
   }
@@ -109,8 +92,13 @@ export class OrdersController {
    * Los datos deben coincidir con la estructura definida en `CreateOrderDto`.
    */
   @Post()
-  async createOrder(@Body() order: CreateOrderDto): Promise<Orders | []> {
-    const orderCreated = await this.ordersService.createOrder(order);
+  async createOrder(
+    @Body() order: CreateOrderDto,
+    @Req() req: Request,
+  ): Promise<Orders | []> {
+    const id_token = req.cookies['id_token'];
+
+    const orderCreated = await this.ordersService.createOrder(id_token, order);
     return orderCreated;
   }
 
