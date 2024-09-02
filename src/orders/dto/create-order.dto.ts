@@ -3,10 +3,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 export class CreateOrderDto {
   @IsNotEmpty()
   @IsString()
-  id_token: string;
-
-  @IsNotEmpty()
-  @IsString()
   name: string;
 
   @IsNotEmpty()

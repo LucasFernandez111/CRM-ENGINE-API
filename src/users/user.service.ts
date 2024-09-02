@@ -5,8 +5,6 @@ import {
 } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
-import { DatabaseUsersService } from 'src/database/database-users/database-users.service';
-import { Users } from 'src/schemas/users.schema';
 
 @Injectable()
 export class UsersService {

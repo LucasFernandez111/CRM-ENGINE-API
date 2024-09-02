@@ -27,8 +27,6 @@ export class UsersController {
   async updateUser(@Req() req: Request, @Body() userData: UpdateUserDto) {
     const id_token = req.cookies['id_token'];
 
-    console.log('userData', userData);
-
     const userUpdate = await this.DatabaseUsersService.updateUser(
       id_token,
       userData,
@@ -53,7 +51,7 @@ export class UsersController {
     return { rows };
   }
 
-  @Put('sheets/rows/update')
+  @Put('sheet')
   @UseGuards(AccessTokenGuard)
   async updateRow(@Body() body: UpdateSheetDto) {
     const range: string = body.range;
