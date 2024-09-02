@@ -43,18 +43,6 @@ export class OrdersService {
     }
   }
 
-  /**
-   * Obtiene las ordenes de hoy de un usuario
-   */
-  async getTodayOrders(id_token: string) {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const todayOrders = await this.ordersModel.find({
-      id_token,
-      createdAt: { $gte: new Date(today) },
-    });
-
-    return todayOrders;
-  }
   async getRecordsByDateRange(
     id_token: string,
     startDate: Date,
@@ -92,7 +80,7 @@ export class OrdersService {
       const orderCreated = this.ordersModel.create({
         id_token,
         ...order,
-        order: lastOrder.order++,
+        order: lastOrder.order + 1,
       });
       return orderCreated;
     } catch (error) {
