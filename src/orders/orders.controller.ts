@@ -32,16 +32,22 @@ export class OrdersController {
    */
   @Get('range')
   async getRecordsByDateRange(
-    @Query('startDate') startDate: any,
-    @Query('endDate') endDate: any,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
     @Req() req: Request,
   ): Promise<Orders[] | []> {
     const id_token = req.cookies['id_token'];
 
+    const startDateRange = new Date(startDate);
+    const endDateRange = new Date(endDate);
+
+    startDateRange.setUTCHours(0, 0, 0, 0);
+    endDateRange.setUTCHours(23, 59, 59, 999);
+
     const records = await this.ordersService.getRecordsByDateRange(
       id_token,
-      startDate,
-      endDate,
+      startDateRange,
+      endDateRange,
     );
     return records;
   }
