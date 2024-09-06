@@ -8,7 +8,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Orders } from '../schemas/orders.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { format } from 'date-fns';
 
 @Injectable()
 export class OrdersService {
@@ -20,12 +19,14 @@ export class OrdersService {
    * Obtiene todas los pedidos de un usuario
    */
   async getOrders(id_token: string) {
-    if (!id_token) throw new BadRequestException('id_token is required');
     try {
       const orders = await this.ordersModel.find({ id_token });
+      if (orders.length === 0)
+        throw new NotFoundException('No orders found for this user');
       return orders;
     } catch (error) {
-      throw new NotFoundException(error?.message);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(error?.message);
     }
   }
 
@@ -48,15 +49,10 @@ export class OrdersService {
     startDate: Date,
     endDate: Date,
   ) {
-    const startOfDay = new Date(startDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(endDate);
-    endOfDay.setHours(23, 59, 59, 999);
-
+    // Filtrar registros por id_token y por el rango de fechas
     const records = await this.ordersModel.find({
       id_token,
-      createdAt: { $gte: startOfDay, $lte: endOfDay },
+      createdAt: { $gte: startDate.toUTCString(), $lte: endDate.toUTCString() },
     });
 
     return records;
@@ -72,6 +68,7 @@ export class OrdersService {
       if (!lastOrder)
         //Si no existe numero de orden se inicializa en 0
         return this.ordersModel.create({
+          id_token,
           ...order,
           order: 1,
         });
