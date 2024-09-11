@@ -1,18 +1,9 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Query,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 import { Request } from 'express';
-import { Orders } from 'src/schemas/orders.schema';
+import { Order } from 'src/schemas/orders.schema';
 
 @Controller('orders')
 export class OrdersController {
@@ -35,7 +26,7 @@ export class OrdersController {
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
     @Req() req: Request,
-  ): Promise<Orders[] | []> {
+  ): Promise<Order[] | []> {
     const id_token = req.cookies['id_token'];
 
     const startDateRange = new Date(startDate);
@@ -44,11 +35,7 @@ export class OrdersController {
     startDateRange.setUTCHours(0, 0, 0, 0);
     endDateRange.setUTCHours(23, 59, 59, 999);
 
-    const records = await this.ordersService.getRecordsByDateRange(
-      id_token,
-      startDateRange,
-      endDateRange,
-    );
+    const records = await this.ordersService.getRecordsByDateRange(id_token, startDateRange, endDateRange);
     return records;
   }
 
@@ -62,7 +49,7 @@ export class OrdersController {
    * El `id_token` se extrae de las cookies o del parámetro de consulta como alternativa.
    */
   @Get()
-  async getOrders(@Req() req: Request): Promise<Orders[] | []> {
+  async getOrders(@Req() req: Request): Promise<Order[] | []> {
     const id_token = req.cookies['id_token'];
 
     const orders = await this.ordersService.getOrders(id_token);
@@ -79,10 +66,7 @@ export class OrdersController {
    * El `id_token` se extrae de las cookies para autenticar la solicitud.
    */
   @Get(':id')
-  async getOrderById(
-    @Param('id') order: string,
-    @Req() req: Request,
-  ): Promise<Orders | []> {
+  async getOrderById(@Param('id') order: string, @Req() req: Request): Promise<Order | []> {
     const id_token = req.cookies['id_token'];
     const orderFound = this.ordersService.getOrderById(id_token, order);
     return orderFound;
@@ -98,10 +82,7 @@ export class OrdersController {
    * Los datos deben coincidir con la estructura definida en `CreateOrderDto`.
    */
   @Post()
-  async createOrder(
-    @Body() order: CreateOrderDto,
-    @Req() req: Request,
-  ): Promise<Orders | []> {
+  async createOrder(@Body() order: CreateOrderDto, @Req() req: Request): Promise<Order | []> {
     const id_token = req.cookies['id_token'];
 
     const orderCreated = await this.ordersService.createOrder(id_token, order);
@@ -119,10 +100,7 @@ export class OrdersController {
    * El `id_token` se extrae de las cookies para autenticar la solicitud.
    */
   @Delete(':id')
-  async deleteOrderById(
-    @Param('id') orderId: string,
-    @Req() req: Request,
-  ): Promise<Orders | []> {
+  async deleteOrderById(@Param('id') orderId: number, @Req() req: Request): Promise<Order | []> {
     const id_token = req.cookies['id_token'];
     return this.ordersService.deleteOrderById(id_token, orderId);
   }
