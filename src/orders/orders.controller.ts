@@ -21,23 +21,23 @@ export class OrdersController {
    * El `id_token` se extrae de las cookies para autenticar la solicitud.
    * Las fechas deben proporcionarse en formato `YYYY-MM-DD`.
    */
-  @Get('range')
-  async getRecordsByDateRange(
-    @Query('startDate') startDate: string,
-    @Query('endDate') endDate: string,
-    @Req() req: Request,
-  ): Promise<Order[] | []> {
-    const id_token = req.cookies['id_token'];
+  // @Get('range')
+  // async getRecordsByDateRange(
+  //   @Query('startDate') startDate: string,
+  //   @Query('endDate') endDate: string,
+  //   @Req() req: Request,
+  // ): Promise<Order[] | []> {
+  //   const id_token = req.cookies['id_token'];
 
-    const startDateRange = new Date(startDate);
-    const endDateRange = new Date(endDate);
+  //   const startDateRange = new Date(startDate);
+  //   const endDateRange = new Date(endDate);
 
-    startDateRange.setUTCHours(0, 0, 0, 0);
-    endDateRange.setUTCHours(23, 59, 59, 999);
+  //   startDateRange.setUTCHours(0, 0, 0, 0);
+  //   endDateRange.setUTCHours(23, 59, 59, 999);
 
-    const records = await this.ordersService.getRecordsByDateRange(id_token, startDateRange, endDateRange);
-    return records;
-  }
+  //   const records = await this.ordersService.getRecordsByDateRange(id_token, startDateRange, endDateRange);
+  //   return records;
+  // }
 
   /**
    * Obtener todas las órdenes asociadas con el usuario autenticado.

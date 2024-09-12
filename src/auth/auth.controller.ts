@@ -14,7 +14,6 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req, @Res() res: Response) {
-    // Aquí puedes manejar el resultado de la autenticación
     const { accessToken, id_token } = req.user;
 
     const user = await this.DatabaseUsersService.getUser(id_token);
@@ -33,9 +32,12 @@ export class AuthController {
       sameSite: 'strict',
       maxAge: 100 * 60 * 1000,
     });
+    return res.json({
+      status: 'success',
+      id_token,
+      accessToken,
+    });
 
-    return res.redirect(
-      `${process.env.CLIENT_URI}/auth/callback?token=${accessToken}`,
-    );
+    // return res.redirect(`${process.env.CLIENT_URI}/auth/callback?token=${accessToken}`);
   }
 }

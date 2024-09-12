@@ -15,12 +15,12 @@ export class Order {
   @Prop({
     type: {
       name: { type: String, required: true },
-      email: { type: String },
+      email: { type: String, default: '@', required: true },
       phone: { type: String, required: true },
       address: {
         street: { type: String, required: true },
         city: { type: String, required: true },
-        postalCode: { type: String },
+        postalCode: { type: String, default: '0000', required: true },
         country: { type: String, required: true },
       },
     },
@@ -28,50 +28,48 @@ export class Order {
   })
   customer: {
     name: string;
-    email?: string;
+    email: string;
     phone: string;
     address: {
       street: string;
       city: string;
-      postalCode?: string;
+      postalCode: string;
       country: string;
     };
   };
 
-  @Prop({
-    type: {
+  @Prop([
+    {
       name: { type: String, required: true },
       description: { type: String, required: true },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
-      total: { type: Number, required: true },
     },
-    required: true,
-  })
+  ])
   items: {
     name: string;
     description: string;
     quantity: number;
     price: number;
-    total: number;
-  };
+  }[];
 
   @Prop({
     type: {
       method: { type: String, enum: PaymentMethod, default: 'Efectivo', required: true },
-      transactionId: { type: String },
+      transactionId: { type: String, default: '#', required: true },
       status: {
         type: String,
         enum: PaymentStatus,
         default: 'Pendiente',
+        required: true,
       },
     },
     required: true,
   })
   paymentDetails: {
     method: string;
-    transactionId?: string;
-    status?: PaymentStatus;
+    transactionId: string;
+    status: PaymentStatus;
   };
 
   @Prop({ required: true })

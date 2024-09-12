@@ -15,8 +15,4 @@ export class ItemDto {
   @IsNotEmpty()
   @IsNumber()
   readonly price: number;
-
-  @IsNotEmpty()
-  @IsNumber()
-  readonly total: number;
 }
