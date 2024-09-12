@@ -1,72 +1,77 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { OrderStatus } from 'src/orders/dto/create-order.dto';
+import { PaymentMethod, PaymentStatus } from 'src/orders/dto/payment.dto';
 
 export type OrderDocument = Order & Document;
 
 @Schema({ timestamps: true })
 export class Order {
-  @Prop({ required: true, unique: true })
+  @Prop({ type: String, required: true })
+  userId: string;
+  @Prop({ required: true })
   orderNumber: number;
 
   @Prop({
     type: {
-      id: { type: Types.ObjectId, ref: 'User', required: true },
       name: { type: String, required: true },
-      email: { type: String, required: true },
+      email: { type: String },
       phone: { type: String, required: true },
       address: {
         street: { type: String, required: true },
         city: { type: String, required: true },
-        state: { type: String, required: true },
-        postalCode: { type: String, required: true },
+        postalCode: { type: String },
         country: { type: String, required: true },
       },
     },
     required: true,
   })
   customer: {
-    id: Types.ObjectId;
     name: string;
-    email: string;
+    email?: string;
     phone: string;
     address: {
       street: string;
       city: string;
-      state: string;
-      postalCode: string;
+      postalCode?: string;
       country: string;
     };
   };
 
-  @Prop([
-    {
-      productId: { type: Types.ObjectId, ref: 'Product', required: true },
+  @Prop({
+    type: {
       name: { type: String, required: true },
+      description: { type: String, required: true },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
       total: { type: Number, required: true },
     },
-  ])
+    required: true,
+  })
   items: {
-    productId: Types.ObjectId;
     name: string;
+    description: string;
     quantity: number;
     price: number;
     total: number;
-  }[];
+  };
 
   @Prop({
     type: {
-      method: { type: String, required: true },
-      transactionId: { type: String, required: true },
-      status: { type: String, enum: ['Pending', 'Completed', 'Failed'], required: true },
+      method: { type: String, enum: PaymentMethod, default: 'Efectivo', required: true },
+      transactionId: { type: String },
+      status: {
+        type: String,
+        enum: PaymentStatus,
+        default: 'Pendiente',
+      },
     },
     required: true,
   })
   paymentDetails: {
     method: string;
-    transactionId: string;
-    status: 'Pending' | 'Completed' | 'Failed';
+    transactionId?: string;
+    status?: PaymentStatus;
   };
 
   @Prop({ required: true })
@@ -74,10 +79,10 @@ export class Order {
 
   @Prop({
     type: String,
-    enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
-    default: 'Pending',
+    enum: OrderStatus,
+    default: 'Pendiente',
   })
-  status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: OrderStatus;
 
   @Prop({ type: String })
   notes?: string;
