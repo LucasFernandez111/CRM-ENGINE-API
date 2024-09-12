@@ -1,14 +1,7 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { OrdersService } from 'src/orders/orders.service';
-import { Orders } from 'src/schemas/orders.schema';
-import {
-  MonthDates,
-  MonthlySalesWithOrders,
-} from './interfaces/month-dates.interface';
+import { Order } from 'src/schemas/orders.schema';
+import { MonthDates, MonthlySalesWithOrders } from './interfaces/month-dates.interface';
 @Injectable()
 export class StatisticsService {
   constructor(private readonly OrdersService: OrdersService) {}
@@ -16,18 +9,14 @@ export class StatisticsService {
   /**
    * Obtiene el pedido mas vendido mediante todas los pedidos del usuario
    */
-  async getTopSellingOrder(id_token: string): Promise<Orders | null> {
+  async getTopSellingOrder(id_token: string): Promise<Order | null> {
     try {
       const orders = await this.OrdersService.getOrders(id_token);
-      const foods = orders.map((order: Orders) =>
-        order.description.toUpperCase(),
-      );
+      const foods = orders.map((order: Order) => order.items.name.toUpperCase());
 
       const foodTop = this.getElementTop(foods);
 
-      const orderTop = orders.find(
-        (order: Orders) => order.description.toUpperCase() === foodTop,
-      );
+      const orderTop = orders.find((order: Order) => order.items.name.toUpperCase() === foodTop);
 
       return orderTop;
     } catch (error) {
@@ -42,14 +31,11 @@ export class StatisticsService {
   async getTotalSales(id_token: string): Promise<number> {
     try {
       const orders = await this.OrdersService.getOrders(id_token);
-      const prices = orders.map((order: Orders) => order.price);
+      const prices = orders.map((order: Order) => order.items.price);
       const totalSales = prices.reduce((a, b) => a + b, 0);
       return totalSales;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error calculating total sales: ',
-        error?.message,
-      );
+      throw new InternalServerErrorException('Error calculating total sales: ', error?.message);
     }
   }
 
@@ -62,19 +48,12 @@ export class StatisticsService {
       startOfDay.setUTCHours(0, 0, 0, 0);
       endOfDay.setUTCHours(23, 59, 59, 999);
 
-      const orders = await this.OrdersService.getRecordsByDateRange(
-        id_token,
-        startOfDay,
-        endOfDay,
-      );
+      const orders = await this.OrdersService.getRecordsByDateRange(id_token, startOfDay, endOfDay);
 
       const totalSalesByDay = this.getTotalSalesOfOrders(orders);
       return { totalOrdersByDay: orders.length, totalSalesByDay };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error getting orders: ',
-        error?.message,
-      );
+      throw new InternalServerErrorException('Error getting orders: ', error?.message);
     }
   }
 
@@ -83,28 +62,18 @@ export class StatisticsService {
       const currentDate = new Date();
       const { startOfWeek, endOfWeek } = this.getStartAndEndOfWeek(currentDate);
 
-      const orders = await this.OrdersService.getRecordsByDateRange(
-        id_token,
-        startOfWeek,
-        endOfWeek,
-      );
+      const orders = await this.OrdersService.getRecordsByDateRange(id_token, startOfWeek, endOfWeek);
       const totalSalesByWeek = this.getTotalSalesOfOrders(orders);
       return totalSalesByWeek;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error getting orders: ',
-        error?.message,
-      );
+      throw new InternalServerErrorException('Error getting orders: ', error?.message);
     }
   }
-  async getTotalSalesByMonth(
-    id_token: string,
-  ): Promise<MonthlySalesWithOrders[]> {
+  async getTotalSalesByMonth(id_token: string): Promise<any> {
     try {
-      const firstAndLastDateOfMonth: MonthDates[] =
-        this.getFirstAndLastDateOfMonth();
+      const firstAndLastDateOfMonth: MonthDates[] = this.getFirstAndLastDateOfMonth();
 
-      const totalSalesByMonth: MonthlySalesWithOrders[] = await Promise.all(
+      const totalSalesByMonth: any = await Promise.all(
         firstAndLastDateOfMonth.map(async (monthDates) => {
           const orders = await this.OrdersService.getRecordsByDateRange(
             id_token,
@@ -129,11 +98,7 @@ export class StatisticsService {
    */
   private getElementTop(elements: Array<string | number>): string | number {
     return elements
-      .sort(
-        (a, b) =>
-          elements.filter((x) => x === a).length -
-          elements.filter((x) => x === b).length,
-      )
+      .sort((a, b) => elements.filter((x) => x === a).length - elements.filter((x) => x === b).length)
       .pop();
   }
 
@@ -173,8 +138,7 @@ export class StatisticsService {
     const dayOfWeek = currentDate.getDay();
 
     // Calcular la diferencia para obtener el Lunes (primer día de la semana)
-    const diffToMonday =
-      currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    const diffToMonday = currentDate.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
 
     const startOfWeek = new Date(currentDate.setDate(diffToMonday));
     startOfWeek.setUTCHours(0, 0, 0, 0);
@@ -186,7 +150,7 @@ export class StatisticsService {
     return { startOfWeek, endOfWeek };
   }
 
-  private getTotalSalesOfOrders(orders: Orders[]): number {
-    return orders.reduce((sum, order) => sum + order.price, 0);
+  private getTotalSalesOfOrders(orders: Order[]): void {
+    // return orders.reduce((sum, order) => sum + order., 0);
   }
 }

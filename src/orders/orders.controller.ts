@@ -83,9 +83,9 @@ export class OrdersController {
    */
   @Post()
   async createOrder(@Body() order: CreateOrderDto, @Req() req: Request): Promise<Order | []> {
-    const id_token = req.cookies['id_token'];
+    const userId = req.cookies['id_token'];
 
-    const orderCreated = await this.ordersService.createOrder(id_token, order);
+    const orderCreated = await this.ordersService.createOrder(userId, order);
     return orderCreated;
   }
 

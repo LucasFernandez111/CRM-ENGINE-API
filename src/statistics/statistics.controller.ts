@@ -12,20 +12,17 @@ export class StatisticsController {
 
     const totalSales = await this.StatisticsService.getTotalSales(id_token);
 
-    const totalSalesByMonth =
-      await this.StatisticsService.getTotalSalesByMonth(id_token);
+    const totalSalesByMonth = await this.StatisticsService.getTotalSalesByMonth(id_token);
 
-    const statisticsByDay =
-      await this.StatisticsService.getStatisticsByDay(id_token);
+    const statisticsByDay = await this.StatisticsService.getStatisticsByDay(id_token);
 
-    const totalSalesByWeek =
-      await this.StatisticsService.getTotalSalesByWeek(id_token);
+    const totalSalesByWeek = await this.StatisticsService.getTotalSalesByWeek(id_token);
 
-    const { description: descriptionTop, price: priceTop } = orderTop;
+    // const { description: descriptionTop, price: priceTop } = orderTop;
 
     const statistics = {
-      descriptionTop,
-      priceTop,
+      // descriptionTop,
+      // priceTop,
       totalSales,
       statisticsByDay,
       totalSalesByMonth,
