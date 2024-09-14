@@ -25,7 +25,7 @@ export class StatisticsController {
   @Get('total-sales-by-month')
   async getAllTotalSalesByMonth(@Req() req: Request) {
     const userId = req.cookies['id_token']; // Accede a la cookie 'id_token'
-    return await this.statictsTotalSales.getTotalSalesForAllMonths(userId);
+    return await this.statictsTotalSales.getTotalSalesByMonth(userId);
   }
 
   // @Get('total-sales-by-month:id')

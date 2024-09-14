@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ErrorManager } from '../../config/error.manager';
 import { OrdersService } from '../../orders/orders.service';
 import { Order } from 'src/schemas/orders.schema';
-import { MonthDates } from '../interfaces/month-dates.interface';
 import { DateService } from 'src/date/date.service';
 
 @Injectable()
