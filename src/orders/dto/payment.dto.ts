@@ -1,9 +1,9 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 export enum PaymentStatus {
-  PENDIENTE = 'Pendiente',
-  COMPLETADO = 'Completado',
-  FALLIDO = 'Fallido',
+  PENDIENTE = 'PENDIENTE',
+  COMPLETADO = 'COMPLETADO',
+  FALLIDO = 'FALLIDO',
 }
 
 export enum PaymentMethod {

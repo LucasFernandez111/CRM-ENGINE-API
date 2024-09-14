@@ -3,7 +3,7 @@ import { UsersService } from './user.service';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
 import { Request } from 'express';
-import { DatabaseUsersService } from 'src/database/database-users/database-users.service';
+import { DatabaseUsersService } from '../database/database-users/database-users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 @Controller('user')
 export class UsersController {
@@ -27,10 +27,7 @@ export class UsersController {
   async updateUser(@Req() req: Request, @Body() userData: UpdateUserDto) {
     const id_token = req.cookies['id_token'];
 
-    const userUpdate = await this.DatabaseUsersService.updateUser(
-      id_token,
-      userData,
-    );
+    const userUpdate = await this.DatabaseUsersService.updateUser(id_token, userData);
 
     return userUpdate;
   }
@@ -57,11 +54,7 @@ export class UsersController {
     const range: string = body.range;
     const values: string[] = body.values;
 
-    await this.usersService.updateRow(
-      process.env.SPREAD_SHEET_ID,
-      range,
-      values,
-    );
+    await this.usersService.updateRow(process.env.SPREAD_SHEET_ID, range, values);
 
     return {
       statusCode: 200,

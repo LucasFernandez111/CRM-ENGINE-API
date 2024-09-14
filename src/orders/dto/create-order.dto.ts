@@ -5,11 +5,11 @@ import { CustomerDto } from './customer.dto';
 import { ItemDto } from './item.dto';
 
 export enum OrderStatus {
-  PENDIENTE = 'Pendiente',
-  PROCESANDO = 'Procesando',
-  ENVIADO = 'Enviado',
-  ENTREGADO = 'Entregado',
-  CANCELADO = 'Cancelado',
+  PENDIENTE = 'PENDIENTE',
+  PROCESANDO = 'PROCESANDO',
+  ENVIADO = 'ENVIADO',
+  ENTREGADO = 'ENTREGADO',
+  CANCELADO = 'CANCELADO',
 }
 
 export class CreateOrderDto {

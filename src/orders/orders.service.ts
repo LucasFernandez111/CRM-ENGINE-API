@@ -1,14 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ErrorManager } from 'src/config/error.manager';
-import { Order } from 'src/schemas/orders.schema';
+import { ErrorManager } from '../config/error.manager';
+import { Order } from '../schemas/orders.schema';
 import { ItemDto } from './dto/item.dto';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { DateService } from 'src/date/date.service';
+import { MonthlyOrders } from 'src/common/monthly-orders.interface';
 
 @Injectable()
 export class OrdersService {
-  constructor(@InjectModel(Order.name) private readonly ordersModel: Model<Order>) {}
+  private isArrayEmpty(array: any[]): boolean {
+    return array.length === 0;
+  }
+  constructor(
+    @InjectModel(Order.name) private readonly ordersModel: Model<Order>,
+    private readonly dateService: DateService,
+  ) {}
 
   /**
    * Obtiene todos los pedidos de un usuario.
@@ -33,13 +41,13 @@ export class OrdersService {
    * Obtiene un pedido por su número de orden.
    *
    * @param {string} userId - El ID del usuario.
-   * @param {string | number} orderId - El número o ID de la orden.
+   * @param {string | number} orderNumber - El número o ID de la orden.
    * @returns {Promise<Order>} - El pedido encontrado.
    * @throws {ErrorManager} - Si no se encuentra la orden.
    */
-  public async getOrderById(userId: string, orderId: string | number): Promise<Order> {
+  public async getOrderByOrderNumber(userId: string, orderNumber: number): Promise<Order> {
     try {
-      const order = await this.ordersModel.findOne({ userId, order: orderId });
+      const order = await this.ordersModel.findOne({ userId, order: orderNumber });
       if (!order) {
         throw new ErrorManager({ type: 'NOT_FOUND', message: 'Order not found' });
       }
@@ -53,20 +61,22 @@ export class OrdersService {
    * Obtiene pedidos en un rango de fechas.
    *
    * @param {string} userId - El ID del usuario.
-   * @param {Date} startDate - La fecha de inicio.
-   * @param {Date} endDate - La fecha de fin.
+   * @param {Date} startDate - La fecha de inicio en UTC.
+   * @param {Date} endDate - La fecha de fin en UTC.
    * @returns {Promise<Order[]>} - Un arreglo con los pedidos en el rango de fechas.
    * @throws {ErrorManager} - Si no se encuentran pedidos.
    */
-  public async getOrdersByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
+  public async getOrdersByDateRange(
+    userId: string,
+    startDate: Date | string,
+    endDate: Date | string,
+  ): Promise<Order[]> {
     try {
       const orders = await this.ordersModel.find({
         userId,
-        createdAt: { $gte: startDate.toUTCString(), $lte: endDate.toUTCString() },
+        createdAt: { $gte: startDate, $lte: endDate },
       });
-      if (this.isArrayEmpty(orders)) {
-        throw new ErrorManager({ type: 'NOT_FOUND', message: 'No records found' });
-      }
+
       return orders;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
@@ -80,10 +90,10 @@ export class OrdersService {
    * @param {CreateOrderDto} orderData - Los datos del nuevo pedido.
    * @returns {Promise<Order>} - El pedido creado.
    */
-  public async createOrder(userId: string, orderData: CreateOrderDto): Promise<Order> {
+  public async createOrder(userId: string, orderData: Order): Promise<Order> {
     try {
-      const totalAmount = this.getTotalAmount(orderData.items);
       const orderNumber = await this.getNextOrderNumber(userId);
+      const totalAmount = this.getTotalAmountOrder(orderData);
 
       const newOrder = {
         userId,
@@ -118,6 +128,10 @@ export class OrdersService {
     }
   }
 
+  private getTotalAmountOrder = (order: Order): number => {
+    return order.items.reduce((acc, item) => acc + item.price, 0);
+  };
+
   /**
    * Obtiene el siguiente número de pedido.
    *
@@ -140,24 +154,77 @@ export class OrdersService {
   }
 
   /**
-   * Verifica si un arreglo está vacío.
-   *
-   * @param {any[]} array - El arreglo a verificar.
-   * @returns {boolean} - `true` si el arreglo está vacío, de lo contrario `false`.
-   */
-  private isArrayEmpty(array: any[]): boolean {
-    return array.length === 0;
-  }
-
-  /**
    * Calcula el monto total de una lista de items.
    *
    * @param {ItemDto[]} items - La lista de items.
    * @returns {number} - El monto total de los items.
    */
-  private getTotalAmount(items: ItemDto[]): number {
+  public async getTotalAmount(userId: string): Promise<number> {
+    const items = await this.getAllItems(userId);
     return items.reduce((acc, item) => acc + item.price, 0);
   }
 
-  
+  public async getAllItems(userId: string): Promise<ItemDto[]> {
+    const orders = await this.getOrders(userId);
+    return orders.map((order) => order.items).flat();
+  }
+
+  public async getAllPrices(userId: string): Promise<number[]> {
+    const items = await this.getAllItems(userId);
+    return items.map((item) => item.price);
+  }
+
+  public async getCurrentWeekOrders(userId: string) {
+    const { startOfWeek, endOfWeek } = this.getDateRangeOfWeek();
+    return this.getOrdersByDateRange(userId, startOfWeek, endOfWeek);
+  }
+
+  public async getOrdersByDay(userId: string) {
+    const now: Date = new Date();
+
+    const startOfTodayUTC: Date = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0),
+    );
+
+    const endOfTodayUTC: Date = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999),
+    );
+
+    return this.getOrdersByDateRange(userId, startOfTodayUTC, endOfTodayUTC);
+  }
+
+  private getDateRangeOfWeek() {
+    const currentDate = new Date(); // Crea una copia de la fecha dada
+
+    // Obtener el día de la semana (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
+    const dayOfWeek = currentDate.getDay() || 7; // Si es domingo (0), se ajusta a 7 para calcular correctamente el lunes
+
+    // Calcular el inicio de la semana (lunes)
+    currentDate.setDate(currentDate.getDate() - dayOfWeek + 1);
+    currentDate.setUTCHours(0, 0, 0, 0);
+    const startOfWeek = new Date(currentDate);
+
+    // Calcular el final de la semana (domingo)
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setUTCHours(23, 59, 59, 999);
+
+    return { startOfWeek, endOfWeek };
+  }
+
+  public async getMonthlyOrders(userId: string): Promise<MonthlyOrders[]> {
+    const currentYear: number = new Date().getUTCFullYear();
+
+    const firstDatesOfYear: Date[] = this.dateService.getAllFirstDatesOfMonths(currentYear);
+    const lastDatesOfYear: Date[] = this.dateService.getAllLastDatesOfMonths(currentYear);
+
+    const ordersPromises = firstDatesOfYear.map((firstDate, index) =>
+      this.getOrdersByDateRange(userId, firstDate, lastDatesOfYear[index]).then((orders) => ({
+        month: index + 1,
+        orders,
+      })),
+    );
+
+    return await Promise.all(ordersPromises);
+  }
 }

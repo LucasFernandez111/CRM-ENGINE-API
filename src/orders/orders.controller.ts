@@ -3,7 +3,7 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 
 import { Request } from 'express';
-import { Order } from 'src/schemas/orders.schema';
+import { Order } from '../schemas/orders.schema';
 
 @Controller('orders')
 export class OrdersController {
@@ -65,12 +65,12 @@ export class OrdersController {
    * Este endpoint devuelve los detalles de una orden específica identificada por su ID.
    * El `id_token` se extrae de las cookies para autenticar la solicitud.
    */
-  @Get(':id')
-  async getOrderById(@Param('id') order: string, @Req() req: Request): Promise<Order | []> {
-    const id_token = req.cookies['id_token'];
-    const orderFound = this.ordersService.getOrderById(id_token, order);
-    return orderFound;
-  }
+  // @Get(':id')
+  // async getOrderById(@Param('id') order: string, @Req() req: Request): Promise<Order | []> {
+  //   const id_token = req.cookies['id_token'];
+  //   const orderFound = this.ordersService.getOrderById(id_token, order);
+  //   return orderFound;
+  // }
 
   /**
    * Crear una nueva orden.
@@ -85,7 +85,7 @@ export class OrdersController {
   async createOrder(@Body() order: CreateOrderDto, @Req() req: Request): Promise<Order | []> {
     const userId = req.cookies['id_token'];
 
-    const orderCreated = await this.ordersService.createOrder(userId, order);
+    const orderCreated = await this.ordersService.createOrder(userId, order as Order);
     return orderCreated;
   }
 

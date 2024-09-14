@@ -1,42 +1,65 @@
 import { Controller, Get, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { StatisticsService } from './statistics.service';
+import { StatisticsTotalSalesService } from './statistics-total-sales/statistics-total-sales.service';
+
 @Controller('statistics')
 export class StatisticsController {
-  constructor(private readonly StatisticsService: StatisticsService) {}
+  constructor(
+    private readonly statisticsService: StatisticsService,
+    private readonly statictsTotalSales: StatisticsTotalSalesService,
+  ) {}
 
-  @Get()
-  async getStatistics(@Req() req: Request) {
-    const id_token = req.cookies['id_token'];
-
-    const orderTop = await this.StatisticsService.getTopSellingOrder(id_token);
+  @Get('total-sales')
+  async getTotalSales(@Req() req: Request) {
+    const userId = req.cookies['id_token']; // Accede a la cookie 'id_token'
+    return await this.statictsTotalSales.getTotalSales(userId);
   }
 
-  // @Get()
-  // async getStatistics(@Req() req: Request) {
-  //   const id_token = req.cookies['id_token'];
+  @Get('total-sales-by-day')
+  async getTotalSalesByDay(@Req() req: Request) {
+    const userId = req.cookies['id_token']; // Accede a la cookie 'id_token'
+    return await this.statictsTotalSales.getTotalSalesByDay(userId);
+  }
 
-  //   const orderTop = await this.StatisticsService.getTopSellingOrder(id_token);
+  @Get('total-sales-by-month')
+  async getAllTotalSalesByMonth(@Req() req: Request) {
+    const userId = req.cookies['id_token']; // Accede a la cookie 'id_token'
+    return await this.statictsTotalSales.getTotalSalesForAllMonths(userId);
+  }
 
-  //   const totalSales = await this.StatisticsService.getTotalSales(id_token);
+  // @Get('total-sales-by-month:id')
+  // async getTotalSalesByMonth(@Req() req: Request) {
+  //   const userId = req.cookies['id_token']; // Accede a la cookie 'id_token'
+  //   return await this.statictsTotalSales.getTotalSalesByMonth(userId);
+  // }
 
-  //   const totalSalesByMonth = await this.StatisticsService.getTotalSalesByMonth(id_token);
+  // @Get('total-sales-by-week')
+  // async getTotalSalesByWeek(@Req() req: Request) {
+  //   const id_token = req.cookies['id_token']; // Accede a la cookie 'id_token'
+  //   return await this.statisticsService.getTotalSalesByWeek(id_token);
+  // }
 
-  //   const statisticsByDay = await this.StatisticsService.getStatisticsByDay(id_token);
+  // @Get('statistics-by-day')
+  // async getStatisticsByDay(@Req() req: Request) {
+  //   const id_token = req.cookies['id_token']; // Accede a la cookie 'id_token'
+  //   return await this.statisticsService.getStatisticsByDay(id_token);
+  // }
 
-  //   const totalSalesByWeek = await this.StatisticsService.getTotalSalesByWeek(id_token);
+  // @Get('summary')
+  // async getStatisticsSummary(@Req() req: Request) {
+  //   const id_token = req.cookies['id_token']; // Accede a la cookie 'id_token'
 
-  //   // const { description: descriptionTop, price: priceTop } = orderTop;
+  //   const totalSales = await this.statisticsService.getTotalSales(id_token);
+  //   const totalSalesByMonth = await this.statisticsService.getTotalSalesByMonth(id_token);
+  //   const statisticsByDay = await this.statisticsService.getStatisticsByDay(id_token);
+  //   const totalSalesByWeek = await this.statisticsService.getTotalSalesByWeek(id_token);
 
-  //   const statistics = {
-  //     // descriptionTop,
-  //     // priceTop,
+  //   return {
   //     totalSales,
-  //     statisticsByDay,
   //     totalSalesByMonth,
+  //     statisticsByDay,
   //     totalSalesByWeek,
   //   };
-
-  //   return statistics;
   // }
 }

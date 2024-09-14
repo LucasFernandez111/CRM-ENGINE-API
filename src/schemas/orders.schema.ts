@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { OrderStatus } from 'src/orders/dto/create-order.dto';
-import { PaymentMethod, PaymentStatus } from 'src/orders/dto/payment.dto';
+import { OrderStatus } from '../orders/dto/create-order.dto';
+import { PaymentMethod, PaymentStatus } from '../orders/dto/payment.dto';
 
 export type OrderDocument = Order & Document;
 
@@ -55,12 +55,12 @@ export class Order {
 
   @Prop({
     type: {
-      method: { type: String, enum: PaymentMethod, default: 'Efectivo', required: true },
+      method: { type: String, enum: PaymentMethod, default: 'EFECTIVO', required: true },
       transactionId: { type: String, default: '#', required: true },
       status: {
         type: String,
         enum: PaymentStatus,
-        default: 'Pendiente',
+        default: 'PENDIENTE',
         required: true,
       },
     },
@@ -78,12 +78,18 @@ export class Order {
   @Prop({
     type: String,
     enum: OrderStatus,
-    default: 'Pendiente',
+    default: 'PENDIENTE',
   })
   status: OrderStatus;
 
   @Prop({ type: String })
   notes?: string;
+
+  @Prop({ type: Date })
+  createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

@@ -1,14 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateUserDto } from 'src/common/dto/create-user.dto';
-import { Users } from 'src/schemas/users.schema';
-import { UpdateUserDto } from 'src/users/dto/update-user.dto';
+import { CreateUserDto } from '../../common/dto/create-user.dto';
+import { Users } from '../../schemas/users.schema';
+import { UpdateUserDto } from '../../users/dto/update-user.dto';
 
 @Injectable()
 export class DatabaseUsersService {
@@ -39,10 +34,7 @@ export class DatabaseUsersService {
   async updateUser(id_token: string, userData: UpdateUserDto) {
     if (!id_token) throw new BadRequestException('id_token is required');
     try {
-      const user = await this.userModel.findOneAndUpdate(
-        { id_token },
-        userData,
-      );
+      const user = await this.userModel.findOneAndUpdate({ id_token }, userData);
       return user;
     } catch (error) {
       throw new NotFoundException(error?.message);
