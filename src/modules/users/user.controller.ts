@@ -3,7 +3,7 @@ import { UsersService } from './user.service';
 import { AccessTokenGuard } from './guards/access-token.guard';
 import { UpdateSheetDto } from './dto/update-sheet.dto';
 import { Request } from 'express';
-import { DatabaseUsersService } from '../database/database-users/database-users.service';
+import { DatabaseUsersService } from '../../database/database-users/database-users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 @Controller('user')
 export class UsersController {

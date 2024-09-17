@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from './users/user.module';
-import { OrdersModule } from './orders/orders.module';
+import { UsersModule } from './modules/users/user.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 import { DatabaseModule } from './database/database.module';
-import { StatisticsModule } from './statistics/statistics.module';
 import { DateModule } from './date/date.module';
 
 @Module({
@@ -17,7 +16,6 @@ import { DateModule } from './date/date.module';
     UsersModule,
     OrdersModule,
     DatabaseModule,
-    StatisticsModule,
     DateModule,
   ],
 })

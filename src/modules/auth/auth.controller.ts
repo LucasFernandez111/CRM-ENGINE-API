@@ -1,7 +1,7 @@
 import { Controller, Get, Res, Req, UseGuards } from '@nestjs/common';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { Response } from 'express';
-import { DatabaseUsersService } from '../database/database-users/database-users.service';
+import { DatabaseUsersService } from '../../database/database-users/database-users.service';
 
 @Controller('auth')
 export class AuthController {

@@ -3,7 +3,7 @@ import { UsersController } from './user.controller';
 import { AuthModule } from '../auth/auth.module';
 import { UsersService } from './user.service';
 import { AccessTokenGuard } from './guards/access-token.guard';
-import { DatabaseModule } from '../database/database.module';
+import { DatabaseModule } from '../../database/database.module';
 
 @Module({
   imports: [AuthModule, DatabaseModule],

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
-import { OrderStatus } from '../orders/dto/create-order.dto';
-import { PaymentMethod, PaymentStatus } from '../orders/dto/payment.dto';
+import { OrderStatus } from '../modules/orders/dto/create-order.dto';
+import { PaymentMethod, PaymentStatus } from '../modules/orders/dto/payment.dto';
 
 export type OrderDocument = Order & Document;
 
