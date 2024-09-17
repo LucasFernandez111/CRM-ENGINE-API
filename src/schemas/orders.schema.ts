@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { OrderStatus } from '../orders/dto/create-order.dto';
 import { PaymentMethod, PaymentStatus } from '../orders/dto/payment.dto';
 
@@ -7,6 +7,7 @@ export type OrderDocument = Order & Document;
 
 @Schema({ timestamps: true })
 export class Order {
+  _id: mongoose.Schema.Types.ObjectId;
   @Prop({ type: String, required: true })
   userId: string;
   @Prop({ required: true })
