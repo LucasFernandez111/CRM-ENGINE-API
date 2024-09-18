@@ -3,6 +3,7 @@ import { ErrorManager } from 'src/config/error.manager';
 import { Order } from 'src/schemas/orders.schema';
 import { OrderRepository } from './order-repository/order-repository.service';
 import { CreateOrderDto, UpdateOrderDto } from '../dto';
+import { DateFilterService } from './date-filter/date-filter.service';
 
 @Injectable()
 export class OrdersService {
@@ -10,7 +11,10 @@ export class OrdersService {
     return orders.length === 0 || orders === null;
   }
 
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly dateFilterService: DateFilterService,
+  ) {}
   public async createOrder(userId: string, order: CreateOrderDto): Promise<Order> {
     try {
       const orders = await this.getLastOrder(userId);
@@ -55,6 +59,60 @@ export class OrdersService {
   }
 
   /**
+   * Get all orders by year
+   * @param userId
+   * @param date
+   * @returns  All orders by year
+   */
+  public async getOrdersByYear(userId: string, date: Date): Promise<Order[]> {
+    const dateStart: Date = this.dateFilterService.getFirstDateOfYear(date);
+    const dateEnd: Date = this.dateFilterService.getLastDateOfYear(date);
+    return await this.orderRepository.findByDateRange(userId, dateStart, dateEnd);
+  }
+
+  /**
+   * Get all orders by month
+   * @param userId
+   * @param date
+   * @returns  All orders by month
+   */
+
+  public async getOrdersByMonth(userId: string, date: Date): Promise<Order[]> {
+    const dateStart: Date = this.dateFilterService.getFirstDateOfMonth(date);
+    const dateEnd: Date = this.dateFilterService.getLastDateOfMonth(date);
+
+    return await this.orderRepository.findByDateRange(userId, dateStart, dateEnd);
+  }
+
+  /**
+   * Get all orders by week
+   * @param userId
+   * @param date
+   * @returns  All orders by week
+   */
+
+  public async getOrdersByWeek(userId: string, date: Date): Promise<Order[]> {
+    const dateStart: Date = this.dateFilterService.getLastDateOfWeek(date);
+    const dateEnd: Date = this.dateFilterService.getLastDateOfWeek(date);
+
+    return await this.orderRepository.findByDateRange(userId, dateStart, dateEnd);
+  }
+
+  /**
+   * Get all orders by day
+   * @param userId
+   * @param date
+   * @returns  All orders by day
+   */
+
+  public async getOrdersByDay(userId: string, date: Date): Promise<Order[]> {
+    const dateStart: Date = this.dateFilterService.getFirstDateOfDay(date);
+    const dateEnd: Date = this.dateFilterService.getLastDateOfDay(date);
+
+    return await this.orderRepository.findByDateRange(userId, dateStart, dateEnd);
+  }
+
+  /**
    * Obtiene la ultima orden del usuario
    * @param userId - identificador de usuario
    * @returns la ultima orden o null
@@ -74,43 +132,6 @@ export class OrdersService {
     return order.items.reduce((acc, item) => acc + item.price, 0);
   };
 
-  // /**
-  //  * Obtiene pedidos en un rango de fechas.
-  //  *
-  //  * @param {string} userId - El ID del usuario.
-  //  * @param {Date} startDate - La fecha de inicio en UTC.
-  //  * @param {Date} endDate - La fecha de fin en UTC.
-  //  * @returns {Promise<Order[]>} - Un arreglo con los pedidos en el rango de fechas.
-  //  * @throws {ErrorManager} - Si no se encuentran pedidos.
-  //  */
-  // public async getOrdersByDateRange(
-  //   userId: string,
-  //   startDate: Date | string,
-  //   endDate: Date | string,
-  // ): Promise<Order[]> {
-  //   try {
-  //     const orders = await this.ordersModel.find({
-  //       userId,
-  //       createdAt: { $gte: startDate, $lte: endDate },
-  //     });
-
-  //     return orders;
-  //   } catch (error) {
-  //     throw ErrorManager.createSignatureError(error.message);
-  //   }
-  // }
-
-  // /**
-  //  * Calcula el monto total de una lista de items.
-  //  *
-  //  * @param {ItemDto[]} items - La lista de items.
-  //  * @returns {number} - El monto total de los items.
-  //  */
-  // public async getTotalAmount(userId: string): Promise<number> {
-  //   const items = await this.getAllItems(userId);
-  //   return items.reduce((acc, item) => acc + item.price, 0);
-  // }
-
   // public async getAllItems(userId: string): Promise<ItemDto[]> {
   //   const orders = await this.getOrders(userId);
   //   return orders.map((order) => order.items).flat();
@@ -124,20 +145,6 @@ export class OrdersService {
   // public async getCurrentWeekOrders(userId: string) {
   //   const { startOfWeek, endOfWeek } = this.getDateRangeOfWeek();
   //   return this.getOrdersByDateRange(userId, startOfWeek, endOfWeek);
-  // }
-
-  // public async getOrdersByDay(userId: string) {
-  //   const now: Date = new Date();
-
-  //   const startOfTodayUTC: Date = new Date(
-  //     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0),
-  //   );
-
-  //   const endOfTodayUTC: Date = new Date(
-  //     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999),
-  //   );
-
-  //   return this.getOrdersByDateRange(userId, startOfTodayUTC, endOfTodayUTC);
   // }
 
   // private getDateRangeOfWeek() {
