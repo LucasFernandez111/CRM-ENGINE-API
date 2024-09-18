@@ -34,8 +34,9 @@ export class OrderRepository implements IOrderRepository {
     return await this.ordersModel.find().exec();
   }
 
-  public async findByDateRange(startDate: Date, endDate: Date): Promise<Order[]> {
+  public async findByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
     return await this.ordersModel.find({
+      userId,
       createdAt: { $gte: startDate, $lte: endDate },
     });
   }
