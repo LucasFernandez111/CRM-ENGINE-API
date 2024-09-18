@@ -2,101 +2,108 @@ import { Injectable } from '@nestjs/common';
 import { OrdersService } from '../orders.service';
 import { ErrorManager } from 'src/config/error.manager';
 import { Order } from 'src/schemas/orders.schema';
-import { OrderRepository } from '../order-repository/order-repository.service';
+
+import { ItemDto } from '../../dto';
+import { DateFilterService } from '../date-filter/date-filter.service';
 
 @Injectable()
 export class SalesStatisticsService {
   constructor(
     private readonly ordersService: OrdersService,
-    private readonly orderRepository: OrderRepository,
+    private readonly dateFilterService: DateFilterService,
   ) {}
 
-  /**
-   * Retrieves the total sales amount for a given user.
-   * @param userId The ID of the user
-   * @returns The total sales amount
-   */
-  public async getTotalSalesAmount(userId: string): Promise<number> {
+  public async getSalesByMonth(userId: string, date: Date): Promise<any[]> {
     try {
-      // Get the orders for the user
+      const months = this.dateFilterService.getMonths(date);
+
+      // Aseguramos que cada promesa sea esperada correctamente
+      const salesMonthPromise = months.map(async (month, i) => ({
+        month: i + 1,
+        dateMonth: this.dateFilterService.toString(month),
+        total: await this.getTotalSalesByMonth(userId, month), // Esperar el valor aquí
+      }));
+
+      // Esperamos a que todas las promesas se resuelvan
+      return await Promise.all(salesMonthPromise);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error);
+    }
+  }
+
+  /**
+   * Get total sales by monthly
+   * @param userId
+   * @param date
+   * @returns {Promise<number>} - total sales by monthly
+   */
+  public async getTotalSalesByMonth(userId: string, date: Date): Promise<number> {
+    try {
+      const orders: Order[] = await this.ordersService.getOrdersByMonth(userId, date);
+
+      console.log(orders);
+
+      return this.calculateTotalAmounts(orders);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  /**
+   *  Get total sales by daily
+   * @param userId
+   * @param date
+   * @returns  {Promise<number>} - total sales by daily
+   */
+
+  public async getTotalSalesByDayl(userId: string, date: Date): Promise<number> {
+    const orders: Order[] = await this.ordersService.getOrdersByDay(userId, date);
+
+    return this.calculateTotalAmounts(orders);
+  }
+
+  public async getTotalSalesByWeek(userId: string, date: Date): Promise<number> {
+    const orders: Order[] = await this.ordersService.getOrdersByWeek(userId, date);
+
+    return this.calculateTotalAmounts(orders);
+  }
+
+  /**
+   *
+   * @param userId
+   * @returns
+   */
+  public async getTotalSalesByYearl(userId: string, date: Date) {
+    const orders: Order[] = await this.ordersService.getOrdersByYear(userId, date);
+    return this.calculateTotalAmounts(orders);
+  }
+
+  /**
+   * Get total sales of all orders the user
+   * @param userId
+   * @returns {Promise<number>}  total sales
+   */
+  public async getTotalSales(userId: string): Promise<number> {
+    try {
       const orders: Order[] = await this.ordersService.getOrders(userId);
 
-      // Calculate the total sales amount by summing up the total amounts of all orders
-      return;
+      return this.calculateTotalAmounts(orders);
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
-
-  public async getTotalSalesByDay(userId: string, date: string) {
-    try {
-      const dateStart: Date = this.setInitialTime(new Date(date));
-      const dateEnd: Date = this.setFinishTime(new Date(date));
-
-      const dateStartUTC: Date = this.generateDateUTC(dateStart);
-      const dateEndUTC: Date = this.generateDateUTC(dateEnd);
-
-      // const orders: Order[] = await this.orderRepository.findByDateRange(dateStartUTC, dateEndUTC);
-
-      return { dateStartUTC, dateEndUTC };
-    } catch (error) {
-      throw ErrorManager.createSignatureError(error.message);
-    }
+  public async getTotalSalesSummary(userId: string, date: Date) {
+    return {
+      day: await this.getTotalSalesByDayl(userId, date),
+      week: await this.getTotalSalesByWeek(userId, date),
+      month: await this.getTotalSalesByMonth(userId, date),
+      year: await this.getTotalSalesByYearl(userId, date),
+    };
   }
-
   private calculateTotalAmounts(orders: Order[]): number {
     return orders.reduce((acc, order) => acc + order.totalAmount, 0);
   }
-  private generateDateUTC(date: Date): Date {
-    return new Date(
-      Date.UTC(
-        date.getUTCFullYear(),
-        date.getUTCMonth(),
-        date.getUTCDate(),
-        date.getUTCHours(),
-        date.getUTCMinutes(),
-        date.getUTCSeconds(),
-      ),
-    );
-  }
 
-  private setInitialTime(date: Date): Date {
-    return new Date(date.setUTCHours(0, 0, 0, 0));
-  }
-  private setFinishTime(date: Date): Date {
-    return new Date(date.setUTCHours(23, 59, 99, 999));
-  }
-
-  // public async getTotalSalesByWeek(userId: string): Promise<number> {
-  //   try {
-  //     const ordersWeek: Order[] = await this.ordersService.getCurrentWeekOrders(userId);
-  //     return this.getTotalSalesForOrder(ordersWeek);
-  //   } catch (error) {
-  //     throw ErrorManager.createSignatureError(error.message);
-  //   }
-  // }
-  // public async getTotalSalesByDay(userId: string): Promise<number> {
-  //   try {
-  //     const ordersDay: Order[] = await this.ordersService.getOrdersByDay(userId);
-  //     return this.getTotalSalesForOrder(ordersDay);
-  //   } catch (error) {
-  //     throw ErrorManager.createSignatureError(error.message);
-  //   }
-  // }
-  // public async getTotalSalesByMonth(userId: string): Promise<number[]> {
-  //   try {
-  //     const currentYear = new Date().getUTCFullYear();
-  //     const firstDatesMonth = this.dateService.getAllFirstDatesOfMonths(currentYear);
-  //     const lastDatesMonth = this.dateService.getAllLastDatesOfMonths(currentYear);
-  //     const promiseArr = firstDatesMonth.map((firstDate, index) =>
-  //       this.ordersService.getOrdersByDateRange(userId, firstDate, lastDatesMonth[index]),
-  //     );
-  //     const allOrdersByMonth = await Promise.all(promiseArr);
-  //     return allOrdersByMonth.map((orders) => this.getTotalSalesForOrder(orders));
-  //   } catch (error) {
-  //     throw ErrorManager.createSignatureError(error.message);
-  //   }
-  // }
   // private getTotalSalesForOrder(orders: Order[]): number {
   //   return orders.reduce((total, order) => total + order.totalAmount, 0);
   // }
@@ -131,16 +138,16 @@ export class SalesStatisticsService {
   /**
    * Obtiene el elemento que mas aparece de un array
    */
-  // private getElementTop(elements: Array<string | number>): string | number {
-  //   return elements
-  //     .sort((a, b) => elements.filter((x) => x === a).length - elements.filter((x) => x === b).length)
-  //     .pop();
-  // }
-  // private getTopItemName(items: ItemDto[]): string | number {
-  //   const itemNames = items.map((item) => item.name.toUpperCase());
-  //   return this.getElementTop(itemNames);
-  // }
-  // private findTopItemInOrders(orders: Order[], topItemName: string | number): ItemDto | null {
-  //   return orders.flatMap((order) => order.items).find((item) => item.name.toUpperCase() === topItemName) || null;
-  // }
+  private getElementTop(elements: Array<string | number>): string | number {
+    return elements
+      .sort((a, b) => elements.filter((x) => x === a).length - elements.filter((x) => x === b).length)
+      .pop();
+  }
+  private getTopItemName(items: ItemDto[]): string | number {
+    const itemNames = items.map((item) => item.name.toUpperCase());
+    return this.getElementTop(itemNames);
+  }
+  private findTopItemInOrders(orders: Order[], topItemName: string | number): ItemDto | null {
+    return orders.flatMap((order) => order.items).find((item) => item.name.toUpperCase() === topItemName) || null;
+  }
 }
