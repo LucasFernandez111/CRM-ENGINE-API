@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Order } from 'src/schemas/orders.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ErrorManager } from 'src/config/error.manager';
 import { IOrderRepository } from '../../interfaces/order-repository.interface';
 import { UpdateOrderDto, CreateOrderDto } from '../../dto';
 
