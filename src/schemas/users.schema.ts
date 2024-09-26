@@ -1,39 +1,37 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type UsersDocument = HydratedDocument<Users>;
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({
   timestamps: true,
 })
-export class Users {
-  @Prop({
-    unique: true,
-    required: true,
-    trim: true,
-  })
+export class User {
+  @Prop({ required: true, trim: true })
   id_token: string;
 
-  @Prop({ trim: true })
+  @Prop({ required: true, trim: true })
+  refreshToken: string;
+  @Prop({ trim: true, default: null })
   picture: string;
 
-  @Prop({ trim: true })
+  @Prop({ trim: true, default: null })
   firstName: string;
 
-  @Prop({ trim: true })
+  @Prop({ trim: true, required: true })
   email: string;
 
-  @Prop({ trim: true })
-  sheet?: string;
+  @Prop({ trim: true, default: null })
+  sheetId: string;
 
-  @Prop({ trim: true })
-  company?: string;
+  @Prop({ trim: true, default: null })
+  company: string;
 
-  @Prop({ trim: true })
-  phone?: string;
+  @Prop({ trim: true, default: null })
+  phone: string;
 
-  @Prop({ trim: true })
-  address?: string;
+  @Prop({ trim: true, default: null })
+  address: string;
 }
 
-export const UsersSchema = SchemaFactory.createForClass(Users); //Creacion de objeto para ser manipulado
+export const UserSchema = SchemaFactory.createForClass(User); //Creacion de objeto para ser manipulado
