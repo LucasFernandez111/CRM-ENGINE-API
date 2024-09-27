@@ -11,7 +11,7 @@ export class User {
   id_token: string;
 
   @Prop({ required: true, trim: true })
-  refreshToken: string;
+  refresh_token: string;
   @Prop({ trim: true, default: null })
   picture: string;
 

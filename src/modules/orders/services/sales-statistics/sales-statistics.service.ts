@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { OrdersService } from '../orders.service';
-import { ErrorManager } from 'src/config/error.manager';
 import { Order } from 'src/schemas/orders.schema';
-
 import { ItemDto } from '../../dto';
 import { DateFilterService } from '../date-filter/date-filter.service';
+import ErrorManager from 'src/config/error.manager';
 
 @Injectable()
 export class SalesStatisticsService {

@@ -3,6 +3,8 @@
         "Module",
         "dto",
         "Controller",
-        "service"
+        "service",
+        "schema",
+        "Guard"
     ]
 }

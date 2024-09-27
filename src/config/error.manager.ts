@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
-export class ErrorManager extends Error {
+export default class ErrorManager extends Error {
   constructor({ type, message }: { type: keyof typeof HttpStatus; message: string }) {
     super(`[${type}] :: ${message}`);
   }

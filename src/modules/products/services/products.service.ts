@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ProductsRepository } from './products-repository/products-repository.service';
-import { ErrorManager } from 'src/config/error.manager';
 import { ProductCreateDTO } from '../interfaces/product-create.dto';
 import { Product } from 'src/schemas/products.schema';
 import { ProductUpdateDTO } from '../interfaces/product-update.dto';
+import ErrorManager from 'src/config/error.manager';
 
 @Injectable()
 export class ProductsService {

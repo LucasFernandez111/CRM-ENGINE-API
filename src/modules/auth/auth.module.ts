@@ -1,14 +1,15 @@
-import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
+import { forwardRef, Module } from '@nestjs/common';
+import { AuthController } from './controllers/auth.controller';
 import { GoogleAuthService } from './google-auth/google-auth.service';
-import { GoogleStrategy } from './strategies/google.strategy';
 import { GoogleOauthGuard } from './guards/google-oauth.guard';
-import { DatabaseModule } from '../../database/database.module';
+import { AccessTokenGuard } from './guards/access-token.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { UsersModule } from '../users/user.module';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [forwardRef(() => UsersModule)],
   controllers: [AuthController],
-  providers: [GoogleAuthService, GoogleStrategy, GoogleOauthGuard],
-  exports: [GoogleAuthService, GoogleOauthGuard],
+  providers: [GoogleAuthService, GoogleStrategy, GoogleOauthGuard, AccessTokenGuard],
+  exports: [GoogleAuthService, GoogleOauthGuard, AccessTokenGuard],
 })
 export class AuthModule {}

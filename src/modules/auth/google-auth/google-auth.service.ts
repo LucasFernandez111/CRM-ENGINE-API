@@ -2,7 +2,7 @@ import { Injectable, Scope } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { TokenInfo } from 'google-auth-library/build/src/auth/oauth2client';
 import { google } from 'googleapis';
-import { ErrorManager } from 'src/config/error.manager';
+import ErrorManager from 'src/config/error.manager';
 
 @Injectable({ scope: Scope.REQUEST })
 export class GoogleAuthService {
@@ -16,8 +16,11 @@ export class GoogleAuthService {
     });
   }
 
-  public async setCredentials(accessToken: string, refreshToken: string): Promise<void> {
-    this.oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
+  public async setCredentials(accessToken: string): Promise<void> {
+    // this.oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
+    await this.oauth2Client.setCredentials({ access_token: accessToken });
+    console.log('paso');
+
     this.accessToken = accessToken;
   }
 
