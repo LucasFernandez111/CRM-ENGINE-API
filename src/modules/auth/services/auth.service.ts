@@ -1,30 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/schemas';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor() {}
 
   /**
    * Creates JWT token
    * @returns JWT token
    */
 
-  public generateJWT(user: Partial<User>) {
+  public async signJWT(user: Partial<User>) {
     const payload = {
       sub: user.id_token,
       refreshToken: user.refresh_token,
     };
 
-    return this.singIn({
+    return await this.generateJWT({
       payload,
       secret: process.env.JWT_SECRET,
       expires: process.env.JWT_EXPIRES,
     });
   }
 
-  private singIn({ payload, secret, expires }: { payload: any; secret: string; expires: string }): string {
-    return this.jwtService.sign(payload, { secret, expiresIn: expires });
+  private async generateJWT({
+    payload,
+    secret,
+    expires,
+  }: {
+    payload: jwt.JwtPayload;
+    secret: string;
+    expires: string;
+  }): Promise<string> {
+    return await jwt.sign(payload, secret, { expiresIn: expires });
   }
 }
