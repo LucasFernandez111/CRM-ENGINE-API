@@ -1,11 +1,11 @@
 import { Controller, Get, Res, Req, UseGuards } from '@nestjs/common';
-
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { GoogleOauthGuard } from '../guards/google-oauth.guard';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor() {}
+  constructor(private readonly authService: AuthService) {}
 
   @Get('google')
   @UseGuards(GoogleOauthGuard)
@@ -13,28 +13,9 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthCallback(@Req() req, @Res() res: Response) {
-    const { accessToken, id_token, refreshToken } = req.user;
-    console.log(refreshToken);
-
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 100 * 60 * 1000,
-    });
-    res.cookie('id_token', id_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 100 * 60 * 1000,
-    });
-    return res.json({
-      status: 'success',
-      id_token,
-      accessToken,
-      refreshToken,
-    });
+  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
+    const jwt = req.user;
+    return res.json({ jwt });
 
     // return res.redirect(`${process.env.CLIENT_URI}/auth/callback?token=${accessToken}`);
   }
