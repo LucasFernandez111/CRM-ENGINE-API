@@ -3,14 +3,21 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Profile } from 'passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { UsersService } from 'src/modules/users/services/user.service';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(private readonly userService: UsersService) {
+  constructor(
+    private readonly userService: UsersService,
+    private readonly authService: AuthService,
+  ) {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3000/auth/google/callback',
+      callbackURL: process.env.GOOGLE_REDIRECT_URI,
+      prompt: 'consent',
+      accessType: 'offline',
+
       scope: ['email', 'profile', 'https://www.googleapis.com/auth/spreadsheets'],
     });
   }
@@ -27,8 +34,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       refresh_token: refreshToken,
       accessToken,
     };
+    const { accessToken: token, ...user } = userProfile;
 
-    // const { accessToken: token, ...user } = userProfile;
+    const jwt = this.authService.generateJWT(user);
+    console.log(jwt);
 
     // const userFind = await this.userService.findUserByTokenId(token);
     // if (!userFind) await this.userService.createUser(user);
