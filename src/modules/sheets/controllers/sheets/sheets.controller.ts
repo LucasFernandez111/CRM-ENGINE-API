@@ -1,16 +1,29 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { SheetService } from '../../services/sheets/sheet.service';
-import { Request } from 'express';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth-guard/jwt-auth.guard';
+import { google } from 'googleapis';
+import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
 
 @Controller('sheets')
 export class SheetsController {
   constructor(private readonly sheetService: SheetService) {}
 
   @Get('products')
-  async getProducts(@Req() req: Request) {
-    const id_token = req.cookies['id_token'];
-    const access_token = req.cookies['access_token'];
+  @UseGuards(JwtAuthGuard)
+  async getProducts(@Req() req) {
+    const { sub: id_token, accessToken: access_token }: PayloadToken = req.user;
 
-    return await this.sheetService.getProducts(id_token, access_token);
+    const ouath2Client = this.sheetService.getOauth2Client({ id_token, access_token });
+
+    return await this.sheetService.getSheetProducts(ouath2Client, '1qay0Xei1JZnILrRF8cNXmwyiL6X6JrPrUbFvOJgzXMk');
+  }
+
+  @Get('products/categories')
+  @UseGuards(JwtAuthGuard)
+  async getCategory(@Req() req) {
+    const { sub: id_token, accessToken: access_token } = req.user;
+    const ouath2Client = this.sheetService.getOauth2Client({ id_token, access_token });
+
+    return await this.sheetService.getCategories(ouath2Client, '1qay0Xei1JZnILrRF8cNXmwyiL6X6JrPrUbFvOJgzXMk');
   }
 }

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { User } from 'src/schemas';
 import * as jwt from 'jsonwebtoken';
 import ErrorManager from 'src/config/error.manager';
+import { access } from 'fs';
+import { PayloadToken } from '../interfaces/payload-token.interface';
 
 @Injectable()
 export class AuthService {
@@ -12,11 +14,7 @@ export class AuthService {
    * @returns JWT token
    */
 
-  public async signJWT(user: Partial<User>) {
-    const payload = {
-      sub: user.id_token,
-    };
-
+  public async signJWT(payload: PayloadToken): Promise<string> {
     return await this.generateJWT({
       payload,
       secret: process.env.JWT_SECRET,
@@ -24,10 +22,9 @@ export class AuthService {
     });
   }
 
-  public async verifyJWT(token: string): Promise<jwt.JwtPayload | string> {
+  public async verifyJWT(token: string): Promise<jwt.JwtPayload | string | PayloadToken> {
     try {
-      await jwt.verify(token, process.env.JWT_SECRET);
-      return await jwt.decode(token);
+      return (await jwt.verify(token, process.env.JWT_SECRET)) as jwt.JwtPayload;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

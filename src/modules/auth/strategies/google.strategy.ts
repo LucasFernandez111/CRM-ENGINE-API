@@ -4,6 +4,8 @@ import { Profile } from 'passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { UsersService } from 'src/modules/users/services/user.service';
 import { AuthService } from '../services/auth.service';
+import { PayloadToken } from '../interfaces/payload-token.interface';
+import { User } from 'src/schemas';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -16,8 +18,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_REDIRECT_URI,
       prompt: 'consent',
-      accessType: 'offline',
-
       scope: ['email', 'profile', 'https://www.googleapis.com/auth/spreadsheets'],
     });
   }
@@ -26,19 +26,29 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const { name, emails, photos } = profile;
 
     const userProfile = {
-      id_token: profile.id,
-      email: emails[0].value,
-      firstName: name.givenName,
-      lastName: name.familyName,
-      picture: photos.length > 0 ? photos[0].value : null,
+      id_token: profile?.id,
+      email: emails[0]?.value,
+      firstName: name?.givenName,
+      lastName: name?.familyName,
+      picture: photos[0]?.value,
       refresh_token: refreshToken,
       accessToken,
     };
-    const { accessToken: token, ...user } = userProfile;
-    // const userFind = await this.userService.findUserByTokenId(token);
-    // if (!userFind) await this.userService.createUser(user);
+    console.log({ refreshToken });
 
-    const jwt = await this.authService.signJWT(user);
+    const { accessToken: access_token, ...user } = userProfile;
+
+    const userFind: User = await this.userService.findUserByTokenId(userProfile.id_token);
+
+    if (!userFind) await this.userService.createUser(user);
+
+    const payloadToken: PayloadToken = {
+      sub: userFind.id_token,
+      accessToken: access_token,
+      sheetId: userFind.sheetId,
+    };
+
+    const jwt: string = await this.authService.signJWT(payloadToken);
 
     done(null, jwt);
   }

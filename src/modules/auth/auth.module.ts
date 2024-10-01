@@ -5,11 +5,12 @@ import { GoogleOauthGuard } from './guards/google-oauth.guard';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { UsersModule } from '../users/user.module';
 import { AuthService } from './services/auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth-guard/jwt-auth.guard';
 
 @Module({
   imports: [forwardRef(() => UsersModule)],
   controllers: [AuthController],
-  providers: [GoogleAuthService, GoogleStrategy, GoogleOauthGuard, , AuthService],
-  exports: [GoogleAuthService, GoogleOauthGuard],
+  providers: [GoogleAuthService, GoogleStrategy, GoogleOauthGuard, JwtAuthGuard, AuthService],
+  exports: [GoogleAuthService, GoogleOauthGuard, JwtAuthGuard, AuthService],
 })
 export class AuthModule {}

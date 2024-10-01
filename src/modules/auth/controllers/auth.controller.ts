@@ -2,6 +2,7 @@ import { Controller, Get, Res, Req, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { GoogleOauthGuard } from '../guards/google-oauth.guard';
 import { AuthService } from '../services/auth.service';
+import { JwtAuthGuard } from '../guards/jwt-auth-guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {

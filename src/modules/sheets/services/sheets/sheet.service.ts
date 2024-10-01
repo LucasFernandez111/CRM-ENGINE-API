@@ -1,53 +1,99 @@
-import { Injectable, Scope } from '@nestjs/common';
-import { OAuth2Client } from 'google-auth-library';
+import { Injectable } from '@nestjs/common';
+import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import ErrorManager from 'src/config/error.manager';
 import { UsersService } from 'src/modules/users/services/user.service';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class SheetService {
-  public oauth2Client: OAuth2Client;
-  constructor(private readonly userService: UsersService) {
-    this.oauth2Client = new google.auth.OAuth2();
-  }
+  private oauth2Client: OAuth2Client;
 
-  public async getProducts<T>(id_token: string, access_token: string): Promise<T[][]> {
-    try {
-      await this.oauth2Client.setCredentials({ access_token });
-      console.log(await this.oauth2Client);
-      // const sheetId = await this.findSheetId(id_token);
-      const sheetId = '1qay0Xei1JZnILrRF8cNXmwyiL6X6JrPrUbFvOJgzXMk';
-      return await this.getSheetData(sheetId, 'Sheet1!A:D');
-    } catch (error) {
-      throw ErrorManager.createSignatureError(error.message);
-    }
-  }
+  constructor(private readonly userService: UsersService) {}
 
-  public async getOauth() {
-    return this.oauth2Client;
-  }
-
-  public async getSheetData(sheetId: string, range: string) {
-    const response = await google.sheets('v4').spreadsheets.values.get({
-      auth: this.oauth2Client,
-      spreadsheetId: sheetId,
-      range: range,
-    });
-    return response.data.values;
-  }
-  public async getStock() {}
-
-  public async getCategory() {}
-
-  private async findSheetId(id_token: string) {
+  /**
+   * Busca el ID de la hoja de cálculo asociado al id_token del usuario
+   */
+  private async findSheetId(id_token: string): Promise<string | undefined> {
     try {
       const { sheetId } = await this.userService.findUserByTokenId(id_token);
-      if (!sheetId) return sheetId;
+      return sheetId;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
-  public async updateSheet(sheetId: string, sheet: any) {
+
+  /**
+   * Crea un cliente OAuth2 configurado con las credenciales proporcionadas
+   */
+  public getOauth2Client(credentials: Credentials): OAuth2Client {
+    const oauth2Client = new OAuth2Client({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      redirectUri: process.env.GOOGLE_REDIRECT_URI,
+    });
+
+    oauth2Client.setCredentials(credentials);
+    return oauth2Client;
+  }
+
+  /**
+   * Obtiene los títulos de las hojas de un documento de Google Sheets
+   */
+  public async getSheets(oauth2Client: OAuth2Client, spreadsheetId: string): Promise<string[]> {
+    try {
+      const { data } = await google.sheets({ version: 'v4', auth: oauth2Client }).spreadsheets.get({ spreadsheetId });
+      return data.sheets?.map((sheet) => sheet.properties.title) ?? [];
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  /**
+   * Obtiene productos de la hoja de cálculo en las columnas A a D
+   */
+  public async getSheetProducts(oauth2Client: OAuth2Client, spreadsheetId: string): Promise<any[]> {
+    try {
+      const titleSheets = await this.getSheets(oauth2Client, spreadsheetId);
+      const range = `${titleSheets[0]}!A:D`;
+      return this.getSheetData(oauth2Client, spreadsheetId, range);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  /**
+   * Obtiene los datos de una hoja de cálculo en el rango especificado
+   */
+  private async getSheetData(oauth2Client: OAuth2Client, spreadsheetId: string, range: string): Promise<any[]> {
+    try {
+      const { data } = await google.sheets({ version: 'v4', auth: oauth2Client }).spreadsheets.values.get({
+        spreadsheetId,
+        range,
+      });
+      return data.values ?? [];
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  /**
+   * Obtiene las categorías de la hoja de cálculo y elimina duplicados
+   */
+  public async getCategories(oauth2Client: OAuth2Client, spreadsheetId: string): Promise<string[]> {
+    try {
+      const titleSheet = await this.getSheets(oauth2Client, spreadsheetId);
+      const range = `${titleSheet[0]}!A2:A`;
+      const categories = (await this.getSheetData(oauth2Client, spreadsheetId, range)).flat();
+      return this.removeDuplicates(categories);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  /**
+   * Actualiza el contenido de una hoja de cálculo en el rango especificado
+   */
+  public async updateSheet(sheetId: string, sheet: any): Promise<void> {
     if (sheet.values.length > 4) throw new ErrorManager({ type: 'BAD_REQUEST', message: 'Range too long' });
     try {
       await google.sheets('v4').spreadsheets.values.update({
@@ -63,4 +109,14 @@ export class SheetService {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
+
+  /**
+   * Elimina elementos duplicados de un arreglo de categorías
+   */
+  private removeDuplicates(categories: string[]): string[] {
+    return [...new Set(categories)];
+  }
+
+  // Este método parece estar sin implementación, lo elimino si no es necesario
+  // public async getStock() {}
 }

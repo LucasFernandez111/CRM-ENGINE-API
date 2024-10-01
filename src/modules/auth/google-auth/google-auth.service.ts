@@ -19,7 +19,6 @@ export class GoogleAuthService {
   public async setCredentials(accessToken: string): Promise<void> {
     // this.oauth2Client.setCredentials({ access_token: accessToken, refresh_token: refreshToken });
     await this.oauth2Client.setCredentials({ access_token: accessToken });
-    console.log('paso');
 
     this.accessToken = accessToken;
   }
