@@ -55,7 +55,7 @@ export class SalesStatisticsService {
    * @returns  {Promise<number>} - total sales by daily
    */
 
-  public async getTotalSalesByDayl(userId: string, date: Date): Promise<number> {
+  public async getTotalSalesByDay(userId: string, date: Date): Promise<number> {
     const orders: Order[] = await this.ordersService.getOrdersByDay(userId, date);
 
     return this.calculateTotalAmounts(orders);
@@ -93,7 +93,7 @@ export class SalesStatisticsService {
   }
   public async getTotalSalesSummary(userId: string, date: Date) {
     return {
-      day: await this.getTotalSalesByDayl(userId, date),
+      day: await this.getTotalSalesByDay(userId, date),
       week: await this.getTotalSalesByWeek(userId, date),
       month: await this.getTotalSalesByMonth(userId, date),
       year: await this.getTotalSalesByYearl(userId, date),
@@ -143,10 +143,10 @@ export class SalesStatisticsService {
       .pop();
   }
   private getTopItemName(items: ItemDto[]): string | number {
-    const itemNames = items.map((item) => item.name.toUpperCase());
+    const itemNames = items.map((item) => item.category.toUpperCase());
     return this.getElementTop(itemNames);
   }
   private findTopItemInOrders(orders: Order[], topItemName: string | number): ItemDto | null {
-    return orders.flatMap((order) => order.items).find((item) => item.name.toUpperCase() === topItemName) || null;
+    return orders.flatMap((order) => order.items).find((item) => item.category.toUpperCase() === topItemName) || null;
   }
 }
