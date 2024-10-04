@@ -18,14 +18,12 @@ export class JwtAuthGuard implements CanActivate {
 
     const payload: PayloadToken = (await this.authService.verifyJWT(token)) as PayloadToken;
 
-    if (!payload || !payload.sub || !payload.accessToken || !payload.sheetId)
+    if (!payload || !payload.sub || !payload.accessToken)
       throw ErrorManager.createSignatureError(
         new ErrorManager({ type: 'UNAUTHORIZED', message: 'Incomplete token' }).message,
       );
 
     req.user = payload;
-
-    //Falta verificar en la Base de datos si existe
 
     return true;
   }
