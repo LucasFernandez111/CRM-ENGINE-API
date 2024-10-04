@@ -1,12 +1,11 @@
 import { Controller, Get, Res, Req, UseGuards } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { GoogleOauthGuard } from '../guards/google-oauth.guard';
-import { AuthService } from '../services/auth.service';
-import { JwtAuthGuard } from '../guards/jwt-auth-guard/jwt-auth.guard';
+import { PayloadToken } from '../interfaces/payload-token.interface';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor() {}
 
   @Get('google')
   @UseGuards(GoogleOauthGuard)
@@ -14,10 +13,15 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleOauthGuard)
-  async googleAuthCallback(@Req() req: Request, @Res() res: Response) {
-    const jwt = req.user;
-    return res.json({ jwt });
+  async googleAuthCallback(@Req() req, @Res() res: Response) {
+    const jwt: PayloadToken = req.user;
+    res.cookie('jwt_token', jwt, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: 1000 * 60 * 60, // 1 hora
+    });
 
-    // return res.redirect(`${process.env.CLIENT_URI}/auth/callback?token=${accessToken}`);
+    return res.redirect(`${process.env.CLIENT_URI}/auth/callback?token=${jwt}`);
   }
 }
