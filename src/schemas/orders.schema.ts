@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { OrderStatus } from '../modules/orders/dto/create-order.dto';
 import { PaymentMethod, PaymentStatus } from '../modules/orders/dto/payment.dto';
 
@@ -7,7 +7,6 @@ export type OrderDocument = Order & Document;
 
 @Schema({ timestamps: true })
 export class Order {
-  _id: mongoose.Schema.Types.ObjectId;
   @Prop({ type: String, required: true })
   userId: string;
   @Prop({ required: true })
@@ -16,7 +15,6 @@ export class Order {
   @Prop({
     type: {
       name: { type: String, required: true },
-      email: { type: String, default: '@', required: true },
       phone: { type: String, required: true },
       address: {
         street: { type: String, required: true },
@@ -29,7 +27,6 @@ export class Order {
   })
   customer: {
     name: string;
-    email: string;
     phone: string;
     address: {
       street: string;
@@ -41,14 +38,16 @@ export class Order {
 
   @Prop([
     {
-      name: { type: String, required: true },
+      category: { type: String, required: true },
+      subcategory: { type: String, required: true },
       description: { type: String, required: true },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
     },
   ])
   items: {
-    name: string;
+    category: string;
+    subcategory: string;
     description: string;
     quantity: number;
     price: number;
@@ -69,7 +68,6 @@ export class Order {
   })
   paymentDetails: {
     method: string;
-    transactionId: string;
     status: PaymentStatus;
   };
 
@@ -81,16 +79,10 @@ export class Order {
     enum: OrderStatus,
     default: 'PENDIENTE',
   })
-  status: OrderStatus;
+  orderStatus: OrderStatus;
 
   @Prop({ type: String })
   notes?: string;
-
-  @Prop({ type: Date })
-  createdAt: Date;
-
-  @Prop({ type: Date })
-  updatedAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
