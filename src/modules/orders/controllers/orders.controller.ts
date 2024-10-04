@@ -1,24 +1,32 @@
-import { Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { Order } from '../../../schemas/orders.schema';
 import { UpdateOrderDto, CreateOrderDto } from '../dto';
 import { OrdersService } from '../services/orders.service';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth-guard/jwt-auth.guard';
+import { UserExistsGuard } from 'src/modules/users/guards/user-exists.guard';
+import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  async createOrder(@Req() req: Request, @Body() order: CreateOrderDto): Promise<Order> {
-    const userId = req.cookies['id_token'];
+  @UseGuards(JwtAuthGuard, UserExistsGuard)
+  async createOrder(@Req() req, @Body() order: CreateOrderDto): Promise<Order> {
+    console.log(order);
+
+    const { sub: userId }: PayloadToken = req.user;
 
     return this.ordersService.createOrder(userId, order);
   }
 
-  @Get()
-  async getOrders(@Req() req: Request): Promise<Order[]> {
-    const userId = req.cookies['id_token'];
-    return this.ordersService.getOrders(userId);
+  @Get('range')
+  @UseGuards(JwtAuthGuard, UserExistsGuard)
+  async getOrdersByDateRange(@Query('startDate') startDate: string, @Query('endDate') endDate: string, @Req() req) {
+    const { sub: userId }: PayloadToken = req.user;
+
+    return { orders: await this.ordersService.getOrdersByRange(userId, new Date(startDate), new Date(endDate)) };
   }
 
   @Delete(':id')

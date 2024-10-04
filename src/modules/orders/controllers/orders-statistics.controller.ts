@@ -1,16 +1,20 @@
-import { Controller, Req, Get, Param } from '@nestjs/common';
+import { Controller, Req, Get, Param, UseGuards, Query } from '@nestjs/common';
 import { SalesStatisticsService } from '../services/sales-statistics/sales-statistics.service';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth-guard/jwt-auth.guard';
+import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
+import { UserExistsGuard } from 'src/modules/users/guards/user-exists.guard';
 
 @Controller('orders/statistics')
 export class OrdersStatisticsController {
   constructor(private readonly salesStatisticsService: SalesStatisticsService) {}
 
   @Get('sales')
-  async getSummarySales(@Req() req: Request) {
-    const userId = req.cookies['id_token'];
+  @UseGuards(JwtAuthGuard, UserExistsGuard)
+  async getSummarySales(@Req() req) {
+    const { sub: userId }: PayloadToken = req.user;
 
-    const initialDate = new Date(); //Current Date
+    const initialDate = new Date();
 
     return {
       sales: {
@@ -25,22 +29,4 @@ export class OrdersStatisticsController {
       },
     };
   }
-
-  @Get('sales:date')
-  async getSummarySalesByDate(@Param('date') date: string, @Req() req: Request) {}
-
-  // @Get('summary')
-  // async getStatisticsSummary(@Req() req: Request) {
-  //   const id_token = req.cookies['id_token']; // Accede a la cookie 'id_token'
-  //   const totalSales = await this.statisticsService.getTotalSales(id_token);
-  //   const totalSalesByMonth = await this.statisticsService.getTotalSalesByMonth(id_token);
-  //   const statisticsByDay = await this.statisticsService.getStatisticsByDay(id_token);
-  //   const totalSalesByWeek = await this.statisticsService.getTotalSalesByWeek(id_token);
-  //   return {
-  //     totalSales,
-  //     totalSalesByMonth,
-  //     statisticsByDay,
-  //     totalSalesByWeek,
-  //   };
-  // }
 }
