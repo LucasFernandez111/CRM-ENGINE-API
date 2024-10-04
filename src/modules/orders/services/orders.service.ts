@@ -22,6 +22,7 @@ export class OrdersService {
       const orderNumber = orders ? orders.orderNumber + 1 : 1;
 
       const updatedOrder = { userId, orderNumber, totalAmount, ...order };
+      console.log(updatedOrder);
 
       return await this.orderRepository.create(updatedOrder);
     } catch (error) {
@@ -110,6 +111,19 @@ export class OrdersService {
     const dateEnd: Date = this.dateFilterService.getLastDateOfDay(date);
 
     return await this.orderRepository.findByDateRange(userId, dateStart, dateEnd);
+  }
+
+  /**
+   * Get all orders by range
+   * @param userId
+   * @param startDate
+   * @param endDate
+   * @returns  All orders by range
+   */
+  public async getOrdersByRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
+    const startDateStart: Date = this.dateFilterService.setStartOfDateUTC(startDate);
+    const endDateEnd: Date = this.dateFilterService.setEndOfDateUTC(endDate);
+    return await this.orderRepository.findByDateRange(userId, startDateStart, endDateEnd);
   }
 
   /**
