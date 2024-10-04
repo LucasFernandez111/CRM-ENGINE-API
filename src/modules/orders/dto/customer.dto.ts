@@ -6,10 +6,6 @@ export class CustomerDto {
   @IsString()
   readonly name: string;
 
-  @IsOptional()
-  @IsString()
-  readonly email?: string;
-
   @IsNotEmpty()
   @IsString()
   readonly phone: string;

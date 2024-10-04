@@ -2,7 +2,10 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 export class ItemDto {
   @IsNotEmpty()
   @IsString()
-  readonly name: string;
+  readonly category: string;
+  @IsNotEmpty()
+  @IsString()
+  readonly subcategory: string;
 
   @IsNotEmpty()
   @IsString()

@@ -18,10 +18,6 @@ export class PaymentDetailsDto {
   readonly method: PaymentMethod;
 
   @IsOptional()
-  @IsString()
-  readonly transactionId?: string;
-
-  @IsOptional()
   @IsEnum(PaymentStatus)
   readonly status?: PaymentStatus;
 }
