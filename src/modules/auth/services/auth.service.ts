@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/schemas';
 import * as jwt from 'jsonwebtoken';
 import ErrorManager from 'src/config/error.manager';
-import { access } from 'fs';
 import { PayloadToken } from '../interfaces/payload-token.interface';
 
 @Injectable()
