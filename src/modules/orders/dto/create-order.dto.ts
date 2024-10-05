@@ -1,4 +1,13 @@
-import { IsNotEmpty, IsOptional, IsString, ValidateNested, IsEnum, IsArray } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  IsEnum,
+  IsArray,
+  IsObject,
+  ArrayMinSize,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaymentDetailsDto } from './payment.dto';
 import { CustomerDto } from './customer.dto';
@@ -19,16 +28,19 @@ export class CreateOrderDto {
 
   @IsNotEmpty()
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => ItemDto)
-  items: ItemDto[];
+  readonly items: ItemDto[];
 
   @IsNotEmpty()
+  @IsObject()
   @ValidateNested()
   @Type(() => PaymentDetailsDto)
   readonly paymentDetails: PaymentDetailsDto;
 
-  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
   @IsEnum(OrderStatus)
   readonly orderStatus?: OrderStatus;
 
