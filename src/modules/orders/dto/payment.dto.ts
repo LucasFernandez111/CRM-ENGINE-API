@@ -1,5 +1,4 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Type } from 'class-transformer';
 export enum PaymentStatus {
   PENDIENTE = 'PENDIENTE',
   COMPLETADO = 'COMPLETADO',
@@ -14,10 +13,10 @@ export class PaymentDetailsDto {
   @IsNotEmpty()
   @IsString()
   @IsEnum(PaymentMethod)
-  @Type(() => String)
   readonly method: PaymentMethod;
 
   @IsOptional()
+  @IsString()
   @IsEnum(PaymentStatus)
   readonly status?: PaymentStatus;
 }
