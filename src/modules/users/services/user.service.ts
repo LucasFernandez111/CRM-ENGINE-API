@@ -8,9 +8,10 @@ import { CreateUserDto } from '../dto';
 export class UsersService {
   constructor(private readonly userRepository: UserRepositoryService) {}
 
-  public async createUser(user: CreateUserDto) {
+  public async createUser(user: CreateUserDto): Promise<User | null> {
     try {
-      return await this.userRepository.create(user);
+      const foundUser = await this.userRepository.findUserByTokenId(user.id_token);
+      return !foundUser ? await this.userRepository.create(user) : null;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
