@@ -1,15 +1,12 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 export class ItemDto {
   @IsNotEmpty()
   @IsString()
   readonly category: string;
-  @IsNotEmpty()
-  @IsString()
-  readonly subcategory: string;
 
   @IsNotEmpty()
   @IsString()
-  readonly description: string;
+  readonly subcategory: string;
 
   @IsNotEmpty()
   @IsNumber()
@@ -18,4 +15,9 @@ export class ItemDto {
   @IsNotEmpty()
   @IsNumber()
   readonly price: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  readonly description?: string;
 }
