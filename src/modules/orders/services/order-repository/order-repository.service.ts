@@ -39,4 +39,8 @@ export class OrderRepository implements IOrderRepository {
       createdAt: { $gte: startDate, $lte: endDate },
     });
   }
+
+  public async findLastestOrder(userId: string): Promise<Order> {
+    return await this.ordersModel.findOne({ userId }).sort({ createdAt: -1 }).exec();
+  }
 }
