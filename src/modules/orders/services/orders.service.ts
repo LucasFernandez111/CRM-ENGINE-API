@@ -17,12 +17,15 @@ export class OrdersService {
   ) {}
   public async createOrder(userId: string, order: CreateOrderDto): Promise<Order> {
     try {
-      const orders = await this.getLastOrder(userId);
-      const totalAmount = this.calculateTotalAmount(orders);
-      const orderNumber = orders ? orders.orderNumber + 1 : 1;
+      const lastestOrder = await this.orderRepository.findLastestOrder(userId);
+      console.log(lastestOrder ? true : false);
+      console.log({ userId });
+
+      const totalAmount = this.calculateTotalAmount(order);
+
+      const orderNumber = lastestOrder ? lastestOrder.orderNumber + 1 : 1;
 
       const updatedOrder = { userId, orderNumber, totalAmount, ...order };
-      console.log(updatedOrder);
 
       return await this.orderRepository.create(updatedOrder);
     } catch (error) {
@@ -127,22 +130,11 @@ export class OrdersService {
   }
 
   /**
-   * Obtiene la ultima orden del usuario
-   * @param userId - identificador de usuario
-   * @returns la ultima orden o null
-   */
-  private getLastOrder = async (userId: string): Promise<Order | null> => {
-    const orders = await this.orderRepository.findAllByUserId(userId);
-    if (this.isOrdenEmpty(orders)) return null;
-    return orders[orders.length - 1];
-  };
-
-  /**
    * Obtiene el monto total de la orden
    * @param order
    * @returns  Total de la orden
    */
-  private calculateTotalAmount = (order: Order): number => {
+  private calculateTotalAmount = (order: CreateOrderDto) => {
     return order.items.reduce((acc, item) => acc + item.price, 0);
   };
 
