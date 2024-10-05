@@ -5,7 +5,6 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { UsersService } from 'src/modules/users/services/user.service';
 import { AuthService } from '../services/auth.service';
 import { PayloadToken } from '../interfaces/payload-token.interface';
-import { User } from 'src/schemas';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -38,14 +37,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     const { accessToken: access_token, ...user } = userProfile;
 
-    const userFind: User = await this.userService.findUserByTokenId(userProfile.id_token);
+    const foundUser = await this.userService.findUserByTokenId(user.id_token);
 
-    if (!userFind) await this.userService.createUser(user);
+    const createdUser = await this.userService.createUser(userProfile);
 
     const payloadToken: PayloadToken = {
-      sub: userFind.id_token,
+      sub: foundUser ? foundUser.id_token : createdUser?.id_token,
       accessToken: access_token,
-      sheetId: userFind.sheetId,
+      sheetId: foundUser ? foundUser.sheetId : createdUser?.sheetId,
     };
 
     const jwt: string = await this.authService.signJWT(payloadToken);
