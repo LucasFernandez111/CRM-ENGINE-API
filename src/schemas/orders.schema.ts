@@ -9,7 +9,7 @@ export type OrderDocument = Order & Document;
 export class Order {
   @Prop({ type: String, required: true })
   userId: string;
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   orderNumber: number;
 
   @Prop({
@@ -40,7 +40,7 @@ export class Order {
     {
       category: { type: String, required: true },
       subcategory: { type: String, required: true },
-      description: { type: String, required: true },
+      description: { type: String },
       quantity: { type: Number, required: true },
       price: { type: Number, required: true },
     },
@@ -48,7 +48,7 @@ export class Order {
   items: {
     category: string;
     subcategory: string;
-    description: string;
+    description?: string;
     quantity: number;
     price: number;
   }[];
