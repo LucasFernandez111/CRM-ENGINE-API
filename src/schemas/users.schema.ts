@@ -10,7 +10,7 @@ export class User {
   @Prop({ required: true, trim: true })
   id_token: string;
 
-  @Prop({ required: true, default: null, trim: true })
+  @Prop({ default: null, trim: true })
   refresh_token: string;
 
   @Prop({ trim: true, default: null })
