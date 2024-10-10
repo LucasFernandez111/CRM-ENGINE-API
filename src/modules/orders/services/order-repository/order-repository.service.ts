@@ -13,8 +13,8 @@ export class OrderRepository implements IOrderRepository {
     return await this.ordersModel.create(order);
   }
 
-  public async update(userId: string, order: UpdateOrderDto): Promise<Order> {
-    return await this.ordersModel.findByIdAndUpdate(userId, order, { new: true }).exec();
+  public async update(id: string, order: UpdateOrderDto): Promise<Order> {
+    return await this.ordersModel.findByIdAndUpdate(id, order, { new: true }).exec();
   }
 
   public async delete(id: string): Promise<void> {
