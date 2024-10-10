@@ -1,5 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { Order } from '../../../schemas/orders.schema';
 import { UpdateOrderDto, CreateOrderDto } from '../dto';
 import { OrdersService } from '../services/orders.service';
@@ -32,6 +31,7 @@ export class OrdersController {
     return await this.ordersService.deleteOrder(id);
   }
 
+  @Put(':id')
   async updateOrder(@Param('id') id: string, @Body() order: UpdateOrderDto): Promise<Order> {
     return await this.ordersService.updateOrder(id, order);
   }
