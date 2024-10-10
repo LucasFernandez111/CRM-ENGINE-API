@@ -15,6 +15,7 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     const jwt: PayloadToken = req.user;
+
     res.cookie('jwt_token', jwt, {
       httpOnly: true,
       secure: true,
