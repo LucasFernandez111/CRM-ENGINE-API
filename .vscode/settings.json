@@ -1,10 +1,11 @@
 {
     "conventionalCommits.scopes": [
-        "Module",
+        "module",
         "dto",
-        "Controller",
+        "controller",
         "service",
         "schema",
-        "Guard"
+        "cuard",
+        "strategy"
     ]
 }
