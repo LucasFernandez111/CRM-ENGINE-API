@@ -43,7 +43,9 @@ export class OrdersService {
 
   public async updateOrder(id: string, order: UpdateOrderDto): Promise<Order> {
     try {
-      return await this.orderRepository.update(id, order);
+      const updatedOrder = await this.orderRepository.update(id, order);
+      if (!updatedOrder) throw new ErrorManager({ type: 'NOT_FOUND', message: 'Order not found for this id' });
+      return updatedOrder;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
