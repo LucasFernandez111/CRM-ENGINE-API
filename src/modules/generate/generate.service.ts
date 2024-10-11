@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
-import * as fs from 'fs';
 import { Response } from 'express';
 import { Order } from 'src/schemas';
 import { OrderStatus, PaymentStatus } from '../orders/dto';
+import { PDFInfo } from './interfaces/pdf.info.interface';
+
+enum FontSizePDF {
+  HEADER = 25,
+  ITEMS = 15,
+  FOOTER = 14,
+}
 
 @Injectable()
 export class GeneratePDFService {
@@ -12,13 +18,13 @@ export class GeneratePDFService {
   public getReportPDF(res: Response) {
     const order: Order = {
       userId: '123213123',
-      orderNumber: 2,
-      totalAmount: 4000,
+      orderNumber: 1,
+      totalAmount: 12500,
       customer: {
-        name: 'Lucas',
-        phone: '1130773485',
+        name: 'Juan Alberto',
+        phone: '11 2354-8879',
         address: {
-          street: 'Marmol 748',
+          street: 'Calle Falsa 123, entre No me acuerdo y',
           city: 'Merlo',
           country: 'Argentina',
           postalCode: '33',
@@ -26,56 +32,89 @@ export class GeneratePDFService {
       },
       items: [
         {
-          category: 'SANDWICH',
-          subcategory: 'PROMO 3',
-          quantity: 2,
-          price: 4000,
+          category: 'Hamburguesa',
+          subcategory: 'Napolitana simple (Sin lechuga)',
+          quantity: 1,
+          price: 8000,
+        },
+        {
+          category: 'Empanadas',
+          subcategory: 'Cheese burger',
+          quantity: 3,
+          price: 4500,
         },
       ],
       paymentDetails: {
         status: PaymentStatus.COMPLETADO,
-        method: 'EFECTIVO',
+        method: 'Efectivo',
       },
       orderStatus: OrderStatus.ENTREGADO,
-      notes: 'Por favor que sea sin tomate',
+      notes: 'Sin tomate',
     };
-    return this.buildPDF(order);
+    return this.buildPDF(order, res);
   }
 
-  private buildPDF(order: Order) {
-    const { customer, items, paymentDetails, orderNumber, totalAmount } = order;
+  private buildPDF(order: Order, res: Response) {
+    const structureObject = this.generateStructureObject(order);
     const doc = new PDFDocument();
 
-    doc.pipe(fs.createWriteStream(`${customer.name}.pdf`));
+    doc.pipe(res);
 
-    // NAME
-    doc.fontSize(25).text(` ${customer.name}`, 100, 100);
+    this.setHeaders(doc, structureObject);
 
-    // ADRESS
-    doc.fontSize(25).text(` ${customer.address}`, 100, 150);
+    doc.fontSize(35).text('------------------------------------', { align: 'center' });
 
-    //PHONE
-    doc.fontSize(25).text(` ${customer.phone}`, 100, 150);
-
-    //ORDER NUMBER
-    doc.fontSize(25).text(` NUMERO DE PEDIDO : ${orderNumber}`, 100, 150);
-
-    doc.dash(5, { space: 10 }).stroke();
-
-    // ITEMS
-    items.forEach((item) => {
-      doc.fontSize(25).text(` ${item.quantity} X  ${item.category}, ${item.description}`, 100, 150);
-      doc.fontSize(25).text(`$${item.price}`, 100, 150);
-    });
-
-    doc.dash(5, { space: 10 }).stroke();
-
-    doc.fontSize(25).text(` TOTAL : ${totalAmount} ${paymentDetails.method}`, 100, 100);
-
-    doc.fontSize(20).text('Muchas gracias, esperamos que disfruten de su comida. bon appetit ;D', 100, 150);
-
-    doc.fontSize(10).text('SISTEMA REALIZADO POR OKEYCORP.COM', 100, 150);
-
+    this.setItems(doc, structureObject);
     return doc;
+  }
+
+  private setItems(doc: PDFKit.PDFDocument, { body }: PDFInfo): void {
+    body.items.forEach((item) => 
+      doc
+        .fontSize(15)
+        .text(`${item?.quantity ?? '-'} x ${item?.category ?? '-'} (${item?.subcategory ?? '-'})`, {
+          align: 'left',
+          lineGap: 5,
+          continued: true,
+        })
+        .text(`$${item?.price ?? '-'}`, { align: 'right', lineGap: 5 })
+        .moveDown(0.5);
+    );
+  }
+
+  private setHeaders(doc: PDFKit.PDFDocument, { header }: PDFInfo): void {
+    doc.fontSize(FontSizePDF.HEADER).text(header.client, { align: 'center', lineGap: 5 });
+    doc.fontSize(FontSizePDF.HEADER).text(header.address, { align: 'center', lineGap: 5 });
+    doc.fontSize(FontSizePDF.HEADER).text(header.phone, { align: 'center', lineGap: 5 });
+    doc.moveDown(1);
+    doc.fontSize(FontSizePDF.HEADER).text(`Numero de PEDIDO  #${orderNumber}`, { align: 'center', lineGap: 20 });
+  }
+
+  private setFooter(doc: PDFKit.PDFDocument, { paymentDetails, totalAmount }: Order): void {
+    doc.fontSize(FontSizePDF.FOOTER).text(`TOTAL: $${totalAmount}  ${paymentDetails.method}`, 100).moveDown();
+    doc
+      .fontSize(FontSizePDF.FOOTER)
+      .text('Muchas gracias, esperamos que disfruten de su comida. Bon appétit ;D', { align: 'center' })
+      .moveDown(3);
+    doc.fontSize(FontSizePDF.FOOTER).text('SISTEMA REALIZADO POR OKEYCORP.COM', { align: 'center' });
+  }
+
+  private generateStructureObject(order: Order): PDFInfo {
+    const { items, paymentDetails, totalAmount, customer, orderNumber, orderStatus } = order;
+
+    return {
+      client: customer.name ,
+      address: customer.address.street ,
+      orderNumber: `NUMERO PEDIDO #${orderNumber?.toString() ?? ''}`  ,
+      items: items.map((item) => ({
+        category: item.category ,
+        subcategory: item.subcategory ,
+        quantity: item.quantity.toString(),
+        price: item.price.toString() ,
+        description: item?.description ?? '',
+      })),
+      totalPrice: totalAmount.toString() ?? '',
+      methodPayment: paymentDetails?.method ?? '',
+    };
   }
 }
