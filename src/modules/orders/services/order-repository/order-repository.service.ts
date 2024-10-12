@@ -21,8 +21,8 @@ export class OrderRepository implements IOrderRepository {
     await this.ordersModel.findByIdAndDelete(id).exec();
   }
 
-  public async findById(userId: string): Promise<Order> {
-    return await this.ordersModel.findById(userId).exec();
+  public async findById(id: string): Promise<Order> {
+    return await this.ordersModel.findById(id).exec();
   }
 
   public async findAllByUserId(userId: string): Promise<Order[]> {
