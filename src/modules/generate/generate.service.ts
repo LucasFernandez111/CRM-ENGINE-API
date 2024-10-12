@@ -2,119 +2,86 @@ import { Injectable } from '@nestjs/common';
 import * as PDFDocument from 'pdfkit';
 import { Response } from 'express';
 import { Order } from 'src/schemas';
-import { OrderStatus, PaymentStatus } from '../orders/dto';
-import { PDFInfo } from './interfaces/pdf.info.interface';
+import { OrdersService } from '../orders/services/orders.service';
 
 enum FontSizePDF {
   HEADER = 25,
-  ITEMS = 15,
-  FOOTER = 14,
+  ITEMS = 20,
+  FOOTER = 17,
 }
 
 @Injectable()
 export class GeneratePDFService {
-  constructor() {}
+  constructor(private readonly orderService: OrdersService) {}
 
-  public getReportPDF(res: Response) {
-    const order: Order = {
-      userId: '123213123',
-      orderNumber: 1,
-      totalAmount: 12500,
-      customer: {
-        name: 'Juan Alberto',
-        phone: '11 2354-8879',
-        address: {
-          street: 'Calle Falsa 123, entre No me acuerdo y',
-          city: 'Merlo',
-          country: 'Argentina',
-          postalCode: '33',
-        },
-      },
-      items: [
-        {
-          category: 'Hamburguesa',
-          subcategory: 'Napolitana simple (Sin lechuga)',
-          quantity: 1,
-          price: 8000,
-        },
-        {
-          category: 'Empanadas',
-          subcategory: 'Cheese burger',
-          quantity: 3,
-          price: 4500,
-        },
-      ],
-      paymentDetails: {
-        status: PaymentStatus.COMPLETADO,
-        method: 'Efectivo',
-      },
-      orderStatus: OrderStatus.ENTREGADO,
-      notes: 'Sin tomate',
-    };
+  public async getReportPDF(res: Response, id: string) {
+    const order: Order = await this.orderService.getOrderById(id);
     return this.buildPDF(order, res);
   }
 
-  private buildPDF(order: Order, res: Response) {
-    const structureObject = this.generateStructureObject(order);
+  private buildPDF(order: Order, res: Response): PDFKit.PDFDocument {
     const doc = new PDFDocument();
 
     doc.pipe(res);
 
-    this.setHeaders(doc, structureObject);
+    this.setHeaders(doc, order);
 
-    doc.fontSize(35).text('------------------------------------', { align: 'center' });
+    this.setLine(doc);
 
-    this.setItems(doc, structureObject);
+    this.setItems(doc, order);
+
+    this.setLine(doc);
+
+    this.setFooter(doc, order);
     return doc;
   }
 
-  private setItems(doc: PDFKit.PDFDocument, { body }: PDFInfo): void {
-    body.items.forEach((item) => 
-      doc
-        .fontSize(15)
-        .text(`${item?.quantity ?? '-'} x ${item?.category ?? '-'} (${item?.subcategory ?? '-'})`, {
-          align: 'left',
-          lineGap: 5,
-          continued: true,
-        })
-        .text(`$${item?.price ?? '-'}`, { align: 'right', lineGap: 5 })
-        .moveDown(0.5);
+  private setItems(doc: PDFKit.PDFDocument, { items }: Order): void {
+    items.forEach((item) =>
+      this.setText(doc, FontSizePDF.ITEMS, `${item.quantity} X ${item.category}`, `$${item.price}`),
     );
   }
 
-  private setHeaders(doc: PDFKit.PDFDocument, { header }: PDFInfo): void {
-    doc.fontSize(FontSizePDF.HEADER).text(header.client, { align: 'center', lineGap: 5 });
-    doc.fontSize(FontSizePDF.HEADER).text(header.address, { align: 'center', lineGap: 5 });
-    doc.fontSize(FontSizePDF.HEADER).text(header.phone, { align: 'center', lineGap: 5 });
-    doc.moveDown(1);
-    doc.fontSize(FontSizePDF.HEADER).text(`Numero de PEDIDO  #${orderNumber}`, { align: 'center', lineGap: 20 });
+  private setText(doc: PDFKit.PDFDocument, size: number, text: string, nextText?: string): void {
+    if (!nextText) {
+      doc.fontSize(size).text(text, { align: 'center', lineGap: 5 });
+    } else {
+      doc
+        .fontSize(size)
+        .text(text, { align: 'left', lineGap: 5, continued: true })
+        .text(nextText, { align: 'right', lineGap: 5 });
+    }
+  }
+
+  private async setHeaders(doc: PDFKit.PDFDocument, { customer, orderNumber }: Order) {
+    doc.moveDown(2);
+    this.setHeaderText(doc, customer.name);
+    this.setHeaderText(doc, customer.phone);
+    this.setHeaderText(doc, customer.address.street);
+    this.setHeaderText(doc, `Numero de PEDIDO  # ${orderNumber}`);
+  }
+
+  private setHeaderText(doc: PDFKit.PDFDocument, text: string) {
+    doc.fontSize(FontSizePDF.HEADER).text(text, { align: 'center', lineGap: 10 });
   }
 
   private setFooter(doc: PDFKit.PDFDocument, { paymentDetails, totalAmount }: Order): void {
-    doc.fontSize(FontSizePDF.FOOTER).text(`TOTAL: $${totalAmount}  ${paymentDetails.method}`, 100).moveDown();
-    doc
-      .fontSize(FontSizePDF.FOOTER)
-      .text('Muchas gracias, esperamos que disfruten de su comida. Bon appétit ;D', { align: 'center' })
-      .moveDown(3);
-    doc.fontSize(FontSizePDF.FOOTER).text('SISTEMA REALIZADO POR OKEYCORP.COM', { align: 'center' });
+    doc.moveDown(1);
+    this.setText(doc, FontSizePDF.ITEMS, `TOTAL $${totalAmount}`, `${paymentDetails.method}`);
+    doc.moveDown(1);
+    this.setText(doc, FontSizePDF.FOOTER, 'Muchas gracias, esperamos que disfruten de su comida. Bon appétit ;D');
+    doc.moveDown(1);
+    this.setText(doc, FontSizePDF.FOOTER, 'SISTEMA REALIZADO POR OKEYCORP.COM');
   }
-
-  private generateStructureObject(order: Order): PDFInfo {
-    const { items, paymentDetails, totalAmount, customer, orderNumber, orderStatus } = order;
-
-    return {
-      client: customer.name ,
-      address: customer.address.street ,
-      orderNumber: `NUMERO PEDIDO #${orderNumber?.toString() ?? ''}`  ,
-      items: items.map((item) => ({
-        category: item.category ,
-        subcategory: item.subcategory ,
-        quantity: item.quantity.toString(),
-        price: item.price.toString() ,
-        description: item?.description ?? '',
-      })),
-      totalPrice: totalAmount.toString() ?? '',
-      methodPayment: paymentDetails?.method ?? '',
-    };
+  private setLine(doc: PDFKit.PDFDocument): void {
+    doc.moveDown(1);
+    doc
+      .moveTo(20, doc.y + 10)
+      .lineTo(400, doc.y + 10)
+      .dash(5, { space: 10 })
+      .lineTo(600, doc.y + 10)
+      .dash(5, { space: 10 })
+      .stroke();
+    doc.moveDown(1);
   }
 }
