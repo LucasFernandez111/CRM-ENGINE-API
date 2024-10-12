@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { OrdersController } from './controllers/orders.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from '../../schemas/orders.schema';
@@ -13,7 +13,7 @@ import { GenerateModule } from '../generate/generate.module';
 
 @Module({
   imports: [
-    GenerateModule,
+    forwardRef(() => GenerateModule),
     AuthModule,
     UsersModule,
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
