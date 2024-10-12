@@ -30,16 +30,16 @@ export class OrdersController {
     private readonly generateService: GeneratePDFService,
   ) {}
 
-  @Get('pdf')
-  getOrderPDF(@Res() res: Response) {
+  @Get('pdf/:id')
+  async getOrderPDF(@Param('id') id: string, @Res() res: Response) {
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename="report.pdf"',
     });
 
-    const docPDF = this.generateService.getReportPDF(res);
+    const docPDF = await this.generateService.getReportPDF(res, id);
 
-    docPDF.end();
+    await docPDF.end();
   }
 
   @Post()
