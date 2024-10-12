@@ -18,8 +18,6 @@ export class OrdersService {
   public async createOrder(userId: string, order: CreateOrderDto): Promise<Order> {
     try {
       const lastestOrder = await this.orderRepository.findLastestOrder(userId);
-      console.log(lastestOrder ? true : false);
-      console.log({ userId });
 
       const totalAmount = this.calculateTotalAmount(order);
 
@@ -129,6 +127,12 @@ export class OrdersService {
     const startDateStart: Date = this.dateFilterService.setStartOfDateUTC(startDate);
     const endDateEnd: Date = this.dateFilterService.setEndOfDateUTC(endDate);
     return await this.orderRepository.findByDateRange(userId, startDateStart, endDateEnd);
+  }
+
+  public async getOrderById(id: string): Promise<Order> {
+    const order = await this.orderRepository.findById(id);
+    if (!order) throw new ErrorManager({ type: 'NOT_FOUND', message: 'Order not found for this id' });
+    return order;
   }
 
   /**
