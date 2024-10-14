@@ -24,6 +24,14 @@ export class SheetsController {
     const { sub: id_token, accessToken: access_token } = req.user;
     const ouath2Client = this.sheetService.getOauth2Client({ id_token, access_token });
 
-    return await this.sheetService.getCategories(ouath2Client, '1qay0Xei1JZnILrRF8cNXmwyiL6X6JrPrUbFvOJgzXMk');
+    const sheetId = '1qay0Xei1JZnILrRF8cNXmwyiL6X6JrPrUbFvOJgzXMk';
+
+    const categories = await this.sheetService.getCategories(ouath2Client, sheetId);
+    const subcategories = await this.sheetService.getSubcategories(ouath2Client, sheetId);
+
+    return {
+      categories,
+      subcategories,
+    };
   }
 }
