@@ -91,6 +91,20 @@ export class SheetService {
   }
 
   /**
+   * Obtiene las subcategorías de la hoja de cálculo
+   */
+  public async getSubcategories(oauth2Client: OAuth2Client, spreadsheetId: string): Promise<string[]> {
+    try {
+      const titleSheet = await this.getSheets(oauth2Client, spreadsheetId);
+      const range = `${titleSheet[0]}!B2:B`;
+      const categories = (await this.getSheetData(oauth2Client, spreadsheetId, range)).flat();
+      return this.removeDuplicates(categories);
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  /**
    * Actualiza el contenido de una hoja de cálculo en el rango especificado
    */
   public async updateSheet(sheetId: string, sheet: any): Promise<void> {
