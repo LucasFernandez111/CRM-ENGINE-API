@@ -7,10 +7,6 @@ import { DateFilterService } from './date-filter/date-filter.service';
 
 @Injectable()
 export class OrdersService {
-  private isOrdenEmpty(orders: Order[]): boolean {
-    return orders.length === 0 || orders === null;
-  }
-
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly dateFilterService: DateFilterService,
@@ -19,7 +15,7 @@ export class OrdersService {
     try {
       const lastestOrder = await this.orderRepository.findLastestOrder(userId);
 
-      const totalAmount = this.calculateTotalAmount(order);
+      const totalAmount = this.calculateTotalAmount(order).toFixed(2);
 
       const orderNumber = lastestOrder ? lastestOrder.orderNumber + 1 : 1;
 
@@ -143,54 +139,4 @@ export class OrdersService {
   private calculateTotalAmount = (order: CreateOrderDto) => {
     return order.items.reduce((acc, item) => acc + item.price, 0);
   };
-
-  // public async getAllItems(userId: string): Promise<ItemDto[]> {
-  //   const orders = await this.getOrders(userId);
-  //   return orders.map((order) => order.items).flat();
-  // }
-
-  // public async getAllPrices(userId: string): Promise<number[]> {
-  //   const items = await this.getAllItems(userId);
-  //   return items.map((item) => item.price);
-  // }
-
-  // public async getCurrentWeekOrders(userId: string) {
-  //   const { startOfWeek, endOfWeek } = this.getDateRangeOfWeek();
-  //   return this.getOrdersByDateRange(userId, startOfWeek, endOfWeek);
-  // }
-
-  // private getDateRangeOfWeek() {
-  //   const currentDate = new Date(); // Crea una copia de la fecha dada
-
-  //   // Obtener el día de la semana (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
-  //   const dayOfWeek = currentDate.getDay() || 7; // Si es domingo (0), se ajusta a 7 para calcular correctamente el lunes
-
-  //   // Calcular el inicio de la semana (lunes)
-  //   currentDate.setDate(currentDate.getDate() - dayOfWeek + 1);
-  //   currentDate.setUTCHours(0, 0, 0, 0);
-  //   const startOfWeek = new Date(currentDate);
-
-  //   // Calcular el final de la semana (domingo)
-  //   const endOfWeek = new Date(startOfWeek);
-  //   endOfWeek.setDate(startOfWeek.getDate() + 6);
-  //   endOfWeek.setUTCHours(23, 59, 59, 999);
-
-  //   return { startOfWeek, endOfWeek };
-  // }
-
-  // public async getMonthlyOrders(userId: string): Promise<MonthlyOrders[]> {
-  //   const currentYear: number = new Date().getUTCFullYear();
-
-  //   const firstDatesOfYear: Date[] = this.dateService.getAllFirstDatesOfMonths(currentYear);
-  //   const lastDatesOfYear: Date[] = this.dateService.getAllLastDatesOfMonths(currentYear);
-
-  //   const ordersPromises = firstDatesOfYear.map((firstDate, index) =>
-  //     this.getOrdersByDateRange(userId, firstDate, lastDatesOfYear[index]).then((orders) => ({
-  //       month: index + 1,
-  //       orders,
-  //     })),
-  //   );
-
-  //   return await Promise.all(ordersPromises);
-  // }
 }
