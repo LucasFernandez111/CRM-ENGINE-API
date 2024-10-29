@@ -122,6 +122,9 @@ export class OrdersService {
   public async getOrdersByRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
     const startDateStart: Date = this.dateFilterService.setStartOfDateUTC(startDate);
     const endDateEnd: Date = this.dateFilterService.setEndOfDateUTC(endDate);
+
+    console.log({ startDateStart, endDateEnd });
+
     return await this.orderRepository.findByDateRange(userId, startDateStart, endDateEnd);
   }
 

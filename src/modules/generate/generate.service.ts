@@ -6,7 +6,7 @@ import { OrdersService } from '../orders/services/orders.service';
 
 enum FontSizePDF {
   HEADER = 25,
-  ITEMS = 20,
+  ITEMS = 16,
   FOOTER = 17,
 }
 
@@ -38,18 +38,31 @@ export class GeneratePDFService {
 
   private setItems(doc: PDFKit.PDFDocument, { items }: Order): void {
     items.forEach((item) =>
-      this.setText(doc, FontSizePDF.ITEMS, `${item.quantity} X ${item.category}`, `$${item.price}`),
+      this.setText(
+        doc,
+        FontSizePDF.ITEMS,
+        `${item.quantity} X ${item.category} ${item.subcategory} `,
+        `${item.description}`,
+        `$${item.price}`,
+      ),
     );
   }
 
-  private setText(doc: PDFKit.PDFDocument, size: number, text: string, nextText?: string): void {
+  private setText(
+    doc: PDFKit.PDFDocument,
+    size: number,
+    text: string,
+    textDescription?: string,
+    nextText?: string,
+  ): void {
     if (!nextText) {
-      doc.fontSize(size).text(text, { align: 'center', lineGap: 5 });
+      doc.fontSize(size).text(text, { align: 'center', lineGap: 20 });
     } else {
       doc
         .fontSize(size)
-        .text(text, { align: 'left', lineGap: 5, continued: true })
-        .text(nextText, { align: 'right', lineGap: 5 });
+        .text(text, { align: 'left', lineGap: 2, continued: true })
+        .text(textDescription, { align: 'center', lineGap: 2, continued: true })
+        .text(nextText, { align: 'right', lineGap: 2 });
     }
   }
 

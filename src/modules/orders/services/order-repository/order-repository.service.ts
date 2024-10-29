@@ -33,6 +33,29 @@ export class OrderRepository implements IOrderRepository {
     return await this.ordersModel.find().exec();
   }
 
+  public async findTopCategory() {
+    return await this.ordersModel.aggregate([
+      {
+        $unwind: '$items',
+      },
+      {
+        $group: {
+          _id: {
+            category: '$items.category',
+            subcategory: '$items.subcategory',
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $limit: 1,
+      },
+    ]);
+  }
+
   public async findByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
     return await this.ordersModel.find({
       userId,

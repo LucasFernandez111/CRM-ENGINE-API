@@ -35,9 +35,9 @@ export class UsersService {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
-  public async updateUser(id_token: string, user: any) {
+  public async updateUser(_id: string, user: any) {
     try {
-      return await this.userRepository.update(id_token, user);
+      console.log(await this.userRepository.update(_id, user));
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
