@@ -1,20 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from './order-repository/order-repository.service';
-import { Order } from 'src/schemas';
+import { Aggregate } from 'mongoose';
+import { OrderTop } from '../interfaces/order-top.interface';
 import ErrorManager from 'src/config/error.manager';
 
 @Injectable()
 export class StatisticsOrderService {
   constructor(private readonly ordersRepository: OrderRepository) {}
 
-  public async getTopOrder(userID: string) {
+  /**
+   * @param userID Campo por el cual machea
+   * @throws Exception si no hay ordenes guardadas
+   * @returns { Aggregate<OrderTop[] | []> }  Devuelve info. de la orden mas solicitada en general
+   */
+  public async getInfoTopOrder(userID: string): Promise<Aggregate<OrderTop[] | []>> {
     try {
-      console.log(await this.ordersRepository.findTopOrden());
-      return 0;
+      const infoTopOrder = await this.ordersRepository.getInfoTopOrder(userID);
+      if (this.isEmpty(infoTopOrder)) throw new ErrorManager({ type: 'NOT_FOUND', message: 'No hay pedidos aun' });
+
+      return infoTopOrder;
     } catch (error) {
-      throw new ErrorManager(error);
+      throw ErrorManager.createSignatureError(error.message);
     }
   }
 
-  public getTopPriceOrder() {}
+  /**
+   * @param userID Campo por el cual machea
+   * @throws Exception si no hay ordenes guardadas
+   * @returns {Aggregate<OrderTop[] | []>} Devuelve info. de la orden mas solicitada de hoy
+   */
+  public async getInfoTopOrderToday(userID: string): Promise<Aggregate<OrderTop[] | []>> {
+    try {
+      const infoTopOrder: OrderTop[] = await this.ordersRepository.getInfoTopOrderToday(userID);
+      if (this.isEmpty(infoTopOrder)) throw new ErrorManager({ type: 'NOT_FOUND', message: 'No hay pedidos aun' });
+
+      return infoTopOrder;
+    } catch (error) {
+      throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  private isEmpty<T>(array: Array<T>) {
+    return !array.length;
+  }
 }
