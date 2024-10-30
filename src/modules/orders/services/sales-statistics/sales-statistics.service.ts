@@ -40,8 +40,6 @@ export class SalesStatisticsService {
     try {
       const orders: Order[] = await this.ordersService.getOrdersByMonth(userId, date);
 
-      console.log(orders);
-
       return this.calculateTotalAmounts(orders);
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);

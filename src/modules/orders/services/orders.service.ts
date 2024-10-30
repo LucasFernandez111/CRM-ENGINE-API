@@ -123,8 +123,6 @@ export class OrdersService {
     const startDateStart: Date = this.dateFilterService.setStartOfDateUTC(startDate);
     const endDateEnd: Date = this.dateFilterService.setEndOfDateUTC(endDate);
 
-    console.log({ startDateStart, endDateEnd });
-
     return await this.orderRepository.findByDateRange(userId, startDateStart, endDateEnd);
   }
 

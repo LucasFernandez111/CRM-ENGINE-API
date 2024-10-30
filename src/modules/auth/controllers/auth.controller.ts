@@ -2,6 +2,7 @@ import { Controller, Get, Res, Req, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { GoogleOauthGuard } from '../guards/google-oauth.guard';
 import { PayloadToken } from '../interfaces/payload-token.interface';
+import { JwtAuthGuard } from '../guards/jwt-auth-guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,12 @@ export class AuthController {
       maxAge: 1000 * 60 * 60, // 1 hora
     });
 
-    return res.redirect(`${process.env.CLIENT_URI}/auth/callback?token=${jwt}`);
+    return res.redirect(process.env.ORIGIN_URI);
+  }
+
+  @Get('verify')
+  @UseGuards(JwtAuthGuard)
+  async verify() {
+    return { message: 'Token verified successfully' };
   }
 }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import ErrorManager from 'src/config/error.manager';
 import { UserRepositoryService } from './user-repository/user-repository.service';
 import { User } from 'src/schemas/users.schema';
-import { CreateUserDto } from '../dto';
+import { CreateUserDto, UpdateUserDTO } from '../dto';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +17,12 @@ export class UsersService {
     }
   }
 
+  /**
+   *
+   * @param id _id de usuario en la base de datos
+   * @returns {User} usuario
+   */
+
   public async findById(id: string): Promise<User> {
     try {
       const user = await this.userRepository.findById(id);
@@ -27,17 +33,30 @@ export class UsersService {
     }
   }
 
-  public async findUserByTokenId(id_token: string): Promise<User> {
+  /**
+   *
+   * @param idToken Id usuario proporcionado por oauth
+   * @returns {User} usuario
+   */
+  public async findUserByTokenId(idToken: string): Promise<User> {
     try {
-      const user = await this.userRepository.findUserByTokenId(id_token);
+      const user = await this.userRepository.findUserByTokenId(idToken);
       return user;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
-  public async updateUser(_id: string, user: any) {
+
+  /**
+   * @param idToken Id usuario proporcionado por oauth
+   * @param updateUser datos a actualizar
+   * @returns {User} usuario acutalizado
+   */
+  public async updateUser(idToken: string, updateUser: UpdateUserDTO): Promise<User> {
     try {
-      console.log(await this.userRepository.update(_id, user));
+      const user = await this.userRepository.update(idToken, updateUser);
+      console.log({ user });
+      return user;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }

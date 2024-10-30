@@ -1,8 +1,9 @@
-import { Controller, Get, UseGuards, Req, Put, Param } from '@nestjs/common';
-import { Request } from 'express'; // Asegúrate de importar Request
-import { UsersService } from './services/user.service';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard/jwt-auth.guard';
+import { PayloadToken } from '../auth/interfaces/payload-token.interface';
+import { UpdateUserDTO } from './dto';
 import { UserExistsGuard } from './guards/user-exists.guard';
+import { UsersService } from './services/user.service';
 
 @Controller('users')
 export class UsersController {
@@ -11,15 +12,16 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard, UserExistsGuard)
   async getUser(@Req() req) {
-    const id_token = req.user.sub;
+    const { sub: idToken }: PayloadToken = req.user;
 
-    return await this.usersService.findUserByTokenId(id_token);
+    return { user: await this.usersService.findUserByTokenId(idToken) };
   }
 
-  @Put(':id')
+  @Put()
   @UseGuards(JwtAuthGuard, UserExistsGuard)
-  async updateUser(@Param('id') _id: string, @Req() req) {
-    const user = req.body;
-    return await this.usersService.updateUser(_id, user);
+  async updateUser(@Req() req, @Body() updateUser: UpdateUserDTO) {
+    const { sub: idToken }: PayloadToken = req.user;
+
+    return await this.usersService.updateUser(idToken, updateUser);
   }
 }

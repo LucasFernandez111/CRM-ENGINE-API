@@ -1,13 +1,13 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateUserDto {
+export class UpdateUserDTO {
   @IsOptional()
   @IsString()
   address?: string;
 
   @IsOptional()
-  @IsNumber()
-  phone?: number;
+  @IsString()
+  phone?: string;
 
   @IsOptional()
   @IsString()
@@ -15,5 +15,5 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  sheet?: string;
+  sheetId?: string;
 }
