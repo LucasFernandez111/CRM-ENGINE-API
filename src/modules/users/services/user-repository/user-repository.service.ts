@@ -17,8 +17,8 @@ export class UserRepositoryService implements IRepository<User> {
   public async findById(id: string): Promise<User> {
     return await this.userModel.findById(id).exec();
   }
-  public async update(_id: string, user: any): Promise<User> {
-    return await this.userModel.findByIdAndUpdate(_id, user, { new: true }).exec();
+  public async update(id_token: string, updateUser: any): Promise<User> {
+    return await this.userModel.findOneAndUpdate({ id_token }, updateUser).exec();
   }
 
   public async findAll(): Promise<User[]> {
