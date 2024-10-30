@@ -1,6 +1,5 @@
 import { Controller, Req, Get, UseGuards } from '@nestjs/common';
 import { SalesStatisticsService } from '../services/sales-statistics/sales-statistics.service';
-
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth-guard/jwt-auth.guard';
 import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
 import { UserExistsGuard } from 'src/modules/users/guards/user-exists.guard';
@@ -30,12 +29,9 @@ export class OrdersStatisticsController {
           salesDay: '',
           salesYear: '',
         },
+
+        topOrder: await this.statisticsOrderService.getInfoTopOrderToday('107135827814026716179'),
       },
     };
-  }
-
-  @Get('top')
-  async getStaticsOrder(@Req() req) {
-    return await this.statisticsOrderService.getTopOrder('111601204432361741631');
   }
 }
