@@ -75,8 +75,8 @@ export class OrderRepository implements IOrderRepository {
     const projectStage: PipelineStage.Project = {
       $project: {
         _id: 0,
-        category: '$_id.category',
-        subcategory: '$_id.subcategory',
+        category: { $arrayElemAt: ['$_id.category', 0] },
+        subcategory: { $arrayElemAt: ['$_id.subcategory', 0] },
         totalAmount: 1,
         count: 1,
       },
@@ -85,11 +85,12 @@ export class OrderRepository implements IOrderRepository {
   }
 
   public async getInfoTopOrderToday(userID: string): Promise<Aggregate<OrderTop[] | []>> {
-    const todayStart = new Date();
-    const todayEnd = new Date();
-
-    todayStart.setHours(0, 0, 0, 0); //Inicio del dia
-    todayEnd.setHours(23, 59, 0, 0); //Fin del dia
+    const todayStart = new Date(
+      Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(), 0, 0, 0, 0),
+    );
+    const todayEnd = new Date(
+      Date.UTC(todayStart.getUTCFullYear(), todayStart.getUTCMonth(), todayStart.getUTCDate(), 23, 59, 59, 999),
+    );
 
     const matchStage: PipelineStage.Match = {
       $match: { userId: userID, createdAt: { $gte: todayStart, $lte: todayEnd } },
@@ -121,8 +122,8 @@ export class OrderRepository implements IOrderRepository {
     const projectStage: PipelineStage.Project = {
       $project: {
         _id: 0,
-        category: '$_id.category',
-        subcategory: '$_id.subcategory',
+        category: { $arrayElemAt: ['$_id.category', 0] },
+        subcategory: { $arrayElemAt: ['$_id.subcategory', 0] },
         totalAmount: 1,
         count: 1,
       },
