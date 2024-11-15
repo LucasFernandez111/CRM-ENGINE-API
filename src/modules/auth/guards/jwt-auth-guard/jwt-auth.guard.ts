@@ -8,7 +8,7 @@ import { Request } from 'express';
 export class JwtAuthGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req: Request = context.switchToHttp().getRequest();
+    const req = context.switchToHttp().getRequest();
     const token = req.cookies['jwt_token'];
 
     if (!token)
