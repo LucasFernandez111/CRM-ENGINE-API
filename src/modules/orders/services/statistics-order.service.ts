@@ -13,12 +13,12 @@ export class StatisticsOrderService {
    * @throws Exception si no hay ordenes guardadas
    * @returns { Aggregate<OrderTop[] | []> }  Devuelve info. de la orden mas solicitada en general
    */
-  public async getInfoTopOrder(userID: string): Promise<Aggregate<OrderTop[] | []>> {
+  public async getInfoTopOrder(userID: string): Promise<Aggregate<OrderTop> | {}> {
     try {
       const infoTopOrder = await this.ordersRepository.getInfoTopOrder(userID);
       if (this.isEmpty(infoTopOrder)) throw new ErrorManager({ type: 'NOT_FOUND', message: 'No hay pedidos aun' });
 
-      return infoTopOrder;
+      return infoTopOrder[0] || {};
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -31,10 +31,7 @@ export class StatisticsOrderService {
    */
   public async getInfoTopOrderToday(userID: string): Promise<Aggregate<OrderTop[] | []>> {
     try {
-      const infoTopOrder: OrderTop[] = await this.ordersRepository.getInfoTopOrderToday(userID);
-      if (this.isEmpty(infoTopOrder)) throw new ErrorManager({ type: 'NOT_FOUND', message: 'No hay pedidos aun' });
-
-      return infoTopOrder;
+      return await this.ordersRepository.getInfoTopOrderToday(userID);
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
