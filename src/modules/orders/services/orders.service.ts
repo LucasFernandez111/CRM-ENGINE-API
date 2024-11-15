@@ -47,8 +47,8 @@ export class OrdersService {
 
   /**
    *
-   * @param userId
-   * @returns las ordenes
+   * @param userId Id del usuario al que pertenece la orden
+   * @returns Todas las ordenes del usuario
    */
   public async getOrders(userId: string): Promise<Order[]> {
     try {
@@ -59,10 +59,9 @@ export class OrdersService {
   }
 
   /**
-   * Get all orders by year
-   * @param userId
+   * @param userId Id del usuario al que pertenece la orden
    * @param date
-   * @returns  All orders by year
+   * @returns  Todas las ordenes del año en especifico
    */
   public async getOrdersByYear(userId: string, date: Date): Promise<Order[]> {
     const dateStart: Date = this.dateFilterService.getFirstDateOfYear(date);
@@ -92,9 +91,9 @@ export class OrdersService {
    */
 
   public async getOrdersByWeek(userId: string, date: Date): Promise<Order[]> {
-    const dateStart: Date = this.dateFilterService.getLastDateOfWeek(date);
-    const dateEnd: Date = this.dateFilterService.getLastDateOfWeek(date);
+    const dateStart: Date = this.dateFilterService.getFirstDateOfWeek(date);
 
+    const dateEnd: Date = this.dateFilterService.getLastDateOfWeek(date);
     return await this.orderRepository.findByDateRange(userId, dateStart, dateEnd);
   }
 
@@ -113,11 +112,10 @@ export class OrdersService {
   }
 
   /**
-   * Get all orders by range
-   * @param userId
-   * @param startDate
-   * @param endDate
-   * @returns  All orders by range
+   * @param userId ID del usuario al que pertenece la orden
+   * @param startDate Fecha de inicio
+   * @param endDate Fecha final
+   * @returns  Todas las ordenes por rango de fecha
    */
   public async getOrdersByRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
     const startDateStart: Date = this.dateFilterService.setStartOfDateUTC(startDate);
@@ -133,9 +131,8 @@ export class OrdersService {
   }
 
   /**
-   * Obtiene el monto total de la orden
    * @param order
-   * @returns  Total de la orden
+   * @returns  Monto total de la orden
    */
   private calculateTotalAmount = (order: CreateOrderDto) => {
     return order.items.reduce((acc, item) => acc + item.price, 0);
