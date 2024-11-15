@@ -7,23 +7,20 @@ export type OrderDocument = Order & Document;
 
 @Schema({ timestamps: true })
 export class Order {
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   userId: string;
-  @Prop({ type: Number, required: true })
+  @Prop({ type: Number })
   orderNumber: number;
 
   @Prop({
     type: {
-      name: { type: String, required: true },
-      phone: { type: String, required: true },
+      name: { type: String },
+      phone: { type: String },
       address: {
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        postalCode: { type: String, default: '0000', required: true },
-        country: { type: String, required: true },
+        street: { type: String },
+        city: { type: String },
       },
     },
-    required: true,
   })
   customer: {
     name: string;
@@ -31,18 +28,16 @@ export class Order {
     address: {
       street: string;
       city: string;
-      postalCode: string;
-      country: string;
     };
   };
 
   @Prop([
     {
-      category: { type: String, required: true },
-      subcategory: { type: String, required: true },
+      category: { type: String },
+      subcategory: { type: String },
       description: { type: String },
-      quantity: { type: Number, required: true },
-      price: { type: Number, required: true },
+      quantity: { type: Number },
+      price: { type: Number },
     },
   ])
   items: {
@@ -55,23 +50,21 @@ export class Order {
 
   @Prop({
     type: {
-      method: { type: String, enum: PaymentMethod, default: 'EFECTIVO', required: true },
-      transactionId: { type: String, default: '#', required: true },
+      method: { type: String, enum: PaymentMethod },
+      transactionId: { type: String },
       status: {
         type: String,
         enum: PaymentStatus,
         default: 'PENDIENTE',
-        required: true,
       },
     },
-    required: true,
   })
   paymentDetails: {
     method: string;
     status: PaymentStatus;
   };
 
-  @Prop({ required: true })
+  @Prop({})
   totalAmount: number;
 
   @Prop({
@@ -83,6 +76,8 @@ export class Order {
 
   @Prop({ type: String })
   notes?: string;
+
+  createdAt: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
