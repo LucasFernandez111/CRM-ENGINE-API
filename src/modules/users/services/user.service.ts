@@ -40,8 +40,7 @@ export class UsersService {
    */
   public async findUserByTokenId(idToken: string): Promise<User> {
     try {
-      const user = await this.userRepository.findUserByTokenId(idToken);
-      return user;
+      return await this.userRepository.findUserByTokenId(idToken);
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
