@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
-import { SheetsController } from './controllers/sheets/sheets.controller';
-import { SheetService } from './services/sheets/sheet.service';
+import { SheetsController } from './sheets.controller';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/user.module';
+import { SheetProductsService } from './services/sheet-products.service';
+import { GoogleApiSheetModule } from '../google-api-sheet/google-api-sheet.module';
+import { OAuth2Module } from '../o-auth2/o-auth2.module';
 
 @Module({
-  imports: [AuthModule, UsersModule],
+  imports: [AuthModule, UsersModule, GoogleApiSheetModule, OAuth2Module],
   controllers: [SheetsController],
-  providers: [SheetService],
+  providers: [SheetProductsService],
 })
 export class SheetsModule {}

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import ErrorManager from 'src/config/error.manager';
+import ErrorManager from 'src/helpers/error.manager';
 import { UserRepositoryService } from './user-repository/user-repository.service';
 import { User } from 'src/schemas/users.schema';
 import { CreateUserDto, UpdateUserDTO } from '../dto';

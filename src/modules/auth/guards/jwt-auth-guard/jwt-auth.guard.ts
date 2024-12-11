@@ -1,8 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpException, Injectable } from '@nestjs/common';
 import { AuthService } from '../../services/auth.service';
-import ErrorManager from 'src/config/error.manager';
 import { PayloadToken } from '../../interfaces/payload-token.interface';
-import { Request } from 'express';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -11,17 +9,13 @@ export class JwtAuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const token = req.cookies['jwt_token'];
 
-    if (!token)
-      throw ErrorManager.createSignatureError(
-        new ErrorManager({ type: 'UNAUTHORIZED', message: 'Token not found' }).message,
-      );
+    if (!token) {
+      throw new HttpException('Unauthorized', 401);
+    }
 
     const payload: PayloadToken = (await this.authService.verifyJWT(token)) as PayloadToken;
 
-    if (!payload || !payload.sub || !payload.accessToken)
-      throw ErrorManager.createSignatureError(
-        new ErrorManager({ type: 'UNAUTHORIZED', message: 'Incomplete token' }).message,
-      );
+    if (!payload || !payload.sub || !payload.accessToken) throw new HttpException('Unauthorized', 401);
 
     req.user = payload;
 

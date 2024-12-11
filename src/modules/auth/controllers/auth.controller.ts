@@ -15,14 +15,12 @@ export class AuthController {
   @UseGuards(GoogleOauthGuard)
   async googleAuthCallback(@Req() req, @Res() res: Response) {
     const jwt: PayloadToken = req.user;
-
     res.cookie('jwt_token', jwt, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: 1000 * 60 * 60, // 1 hora
     });
-
     return res.redirect(`${process.env.ORIGIN_URI}/auth/google`);
   }
 

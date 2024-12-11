@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { Observable } from 'rxjs';
-import ErrorManager from 'src/config/error.manager';
+import ErrorManager from 'src/helpers/error.manager';
 import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
 import { UsersService } from 'src/modules/users/services/user.service';
 import { User } from 'src/schemas';

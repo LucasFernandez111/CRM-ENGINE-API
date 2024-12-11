@@ -8,18 +8,12 @@ import { SalesStatisticsService } from './services/sales-statistics/sales-statis
 import { OrdersService } from './services/orders.service';
 import { DateFilterService } from './services/date-filter/date-filter.service';
 import { AuthModule } from '../auth/auth.module';
-import { GenerateModule } from '../generate/generate.module';
 import { StatisticsOrderService } from './services/statistics-order.service';
 
 @Module({
-  imports: [
-    forwardRef(() => GenerateModule),
-    AuthModule,
-    UsersModule,
-    MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
-  ],
+  imports: [AuthModule, UsersModule, MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }])],
   controllers: [OrdersController],
   providers: [OrdersService, OrderRepository, DateFilterService, SalesStatisticsService, StatisticsOrderService],
-  exports: [OrdersService],
+  exports: [OrdersService, SalesStatisticsService, StatisticsOrderService],
 })
 export class OrdersModule {}

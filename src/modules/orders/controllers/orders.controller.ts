@@ -1,9 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { Response } from 'express';
-import ErrorManager from 'src/config/error.manager';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import ErrorManager from 'src/helpers/error.manager';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth-guard/jwt-auth.guard';
 import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
-import { GeneratePDFService } from 'src/modules/generate/generate.service';
 import { UserExistsGuard } from 'src/modules/users/guards/user-exists.guard';
 import { Order } from '../../../schemas/orders.schema';
 import { CreateOrderDto, UpdateOrderDto } from '../dto';
@@ -15,28 +13,21 @@ import { StatisticsOrderService } from '../services/statistics-order.service';
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
-    private readonly generateService: GeneratePDFService,
     private readonly statisticsOrderService: StatisticsOrderService,
     private readonly statisticsSalesService: SalesStatisticsService,
   ) {}
-
-  @Get('pdf/:id')
-  async getOrderPDF(@Param('id') id: string, @Res() res: Response) {
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="report.pdf"',
-    });
-
-    const docPDF = await this.generateService.getReportPDF(res, id);
-
-    await docPDF.end();
-  }
 
   @Post()
   @UseGuards(JwtAuthGuard, UserExistsGuard)
   async createOrder(@Req() req, @Body() order: CreateOrderDto): Promise<any> {
     const { sub: userId }: PayloadToken = req.user;
 
+    return this.ordersService.createOrder(userId, order);
+  }
+
+  @HttpCode(200)
+  @Post('whatsapp/:id')
+  async sendOrderToWhatsApp(@Body() order: CreateOrderDto, @Param('id') userId: string) {
     return this.ordersService.createOrder(userId, order);
   }
 
@@ -69,18 +60,7 @@ export class OrdersController {
         new ErrorManager({ type: 'UNAUTHORIZED', message: 'ID sheet not found' }).message,
       );
     }
-    return {
-      sales: {
-        total: await this.statisticsSalesService.getTotalSales(userId),
-        current: await this.statisticsSalesService.getTotalSalesSummary(userId, initialDate),
-        periodSales: {
-          salesMonth: await this.statisticsSalesService.getSalesByMonth(userId, initialDate),
-          salesWeek: '',
-          salesDay: '',
-          salesYear: '',
-        },
-      },
-    };
+    return this.statisticsSalesService.getDetailsSalesReport(userId, initialDate);
   }
 
   @Get('statistics/top-order')

@@ -3,7 +3,7 @@ import { OrdersService } from '../orders.service';
 import { Order } from 'src/schemas/orders.schema';
 import { ItemDto } from '../../dto';
 import { DateFilterService } from '../date-filter/date-filter.service';
-import ErrorManager from 'src/config/error.manager';
+import ErrorManager from 'src/helpers/error.manager';
 
 @Injectable()
 export class SalesStatisticsService {
@@ -97,41 +97,22 @@ export class SalesStatisticsService {
       year: await this.getTotalSalesByYearl(userId, date),
     };
   }
+
+  public async getDetailsSalesReport(userId: string, date: Date) {
+    return {
+      sales: {
+        total: await this.getTotalSales(userId),
+        current: await this.getTotalSalesSummary(userId, date),
+        periodSales: {
+          salesMonth: await this.getSalesByMonth(userId, date),
+        },
+      },
+    };
+  }
   private calculateTotalAmounts(orders: Order[]): number {
     return orders.reduce((acc, order) => acc + order.totalAmount, 0);
   }
 
-  // private getTotalSalesForOrder(orders: Order[]): number {
-  //   return orders.reduce((total, order) => total + order.totalAmount, 0);
-  // }
-  // /**
-  //  * Gets the top item of the user
-  //  * @param {string} userId The user id
-  //  * @returns {Promise<ItemDto>} The top item
-  //  */
-  // public async getTopItem(userId: string): Promise<ItemDto> {
-  //   try {
-  //     const orders: Order[] = await this.OrdersService.getOrders(userId);
-  //     const allItems: ItemDto[] = await this.OrdersService.getAllItems(userId);
-  //     const topItemName: string | number = this.getTopItemName(allItems);
-  //     return this.findTopItemInOrders(orders, topItemName);
-  //   } catch (error) {
-  //     throw ErrorManager.createSignatureError(error.message);
-  //   }
-  // /** Obtiene las ordenes totales del dia */
-  // async getStatisticsByDay(id_token: string): Promise<any> {
-  //   try {
-  //     const startOfDay = new Date();
-  //     const endOfDay = new Date();
-  //     startOfDay.setUTCHours(0, 0, 0, 0);
-  //     endOfDay.setUTCHours(23, 59, 59, 999);
-  //     const orders = await this.OrdersService.getRecordsByDateRange(id_token, startOfDay, endOfDay);
-  //     const totalSalesByDay = this.getTotalSalesOfOrders(orders);
-  //     return { totalOrdersByDay: orders.length, totalSalesByDay };
-  //   } catch (error) {
-  //     throw new InternalServerErrorException('Error getting orders: ', error?.message);
-  //   }
-  // }
   /**
    * Obtiene el elemento que mas aparece de un array
    */

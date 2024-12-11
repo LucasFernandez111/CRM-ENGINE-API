@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import ErrorManager from 'src/config/error.manager';
+import ErrorManager from 'src/helpers/error.manager';
 import { Order } from 'src/schemas/orders.schema';
 import { OrderRepository } from './order-repository/order-repository.service';
 import { CreateOrderDto, UpdateOrderDto } from '../dto';
@@ -120,6 +120,8 @@ export class OrdersService {
   public async getOrdersByRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
     const startDateStart: Date = this.dateFilterService.setStartOfDateUTC(startDate);
     const endDateEnd: Date = this.dateFilterService.setEndOfDateUTC(endDate);
+
+    console.log(startDateStart, endDateEnd);
 
     return await this.orderRepository.findByDateRange(userId, startDateStart, endDateEnd);
   }
