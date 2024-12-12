@@ -47,8 +47,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       sheetId: foundUser ? foundUser.sheetId : createdUser?.sheetId,
     };
 
-    const jwt: string = await this.authService.signJWT(payloadToken);
+    // const jwt: string = await this.authService.signJWT(payloadToken);
 
-    done(null, jwt);
+    // done(null, jwt);
   }
 }
