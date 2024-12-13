@@ -1,8 +1,10 @@
-import { Controller, Get, Res, Req, UseGuards, Body, Post } from '@nestjs/common';
+import { Controller, Request, Post, UseGuards, Body, Get } from '@nestjs/common';
 
 import { ServiceAccountDTO } from 'src/modules/auth/dto/service-account.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from './services/auth.service';
+import { AuthService } from './auth.service';
+import { log } from 'console';
+import { ServiceAccountGuard } from './guard/service-account.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -14,12 +16,13 @@ export class AuthController {
 
   @Post('signin')
   async signIn(@Body() serviceAccount: ServiceAccountDTO) {
-    return this.authService.generateJWTServiceAccount(serviceAccount);
+    return this.authService.signIn(serviceAccount);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(ServiceAccountGuard)
   @Get('test')
-  async test() {
+  async test(@Request() req) {
+    console.log(req.user);
     return 'OK';
   }
 }

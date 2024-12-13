@@ -1,4 +1,3 @@
-import { IRepository } from 'src/common/interfaces/repository.interface';
 import { Order } from 'src/schemas/orders.schema';
 import { UpdateOrderDto, CreateOrderDto } from '../dto';
 
@@ -7,6 +6,6 @@ import { UpdateOrderDto, CreateOrderDto } from '../dto';
  *
  * @extends IRepository<Order|CreateOrderDto|UpdateOrderDto>
  */
-export interface IOrderRepository extends IRepository<Order, CreateOrderDto, UpdateOrderDto> {
+export interface IOrderRepository {
   findAllByUserId(userId: string): Promise<Order[]>;
 }

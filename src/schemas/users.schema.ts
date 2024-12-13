@@ -7,23 +7,14 @@ export type UserDocument = HydratedDocument<User>;
   timestamps: true,
 })
 export class User {
-  @Prop({ required: true, trim: true })
-  id_token: string;
-
   @Prop({ default: null, trim: true })
   refresh_token: string;
-
-  @Prop({ trim: true, default: null })
-  picture: string;
 
   @Prop({ trim: true, default: null })
   firstName: string;
 
   @Prop({ required: true, trim: true })
   email: string;
-
-  @Prop({ trim: true, default: null })
-  sheetId: string;
 
   @Prop({ trim: true, default: null })
   company: string;

@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { IRepository } from 'src/common/interfaces/repository.interface';
 import { User } from 'src/schemas/users.schema';
 
 @Injectable()
-export class UserRepositoryService implements IRepository<User> {
+export class UserService {
   constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {}
 
   public async create(user: any): Promise<User> {
@@ -27,5 +26,9 @@ export class UserRepositoryService implements IRepository<User> {
 
   public async findUserByTokenId(id_token: string): Promise<User> {
     return await this.userModel.findOne({ id_token }).exec();
+  }
+
+  public async findUserByEmail(email: string): Promise<User> {
+    return await this.userModel.findOne({ email }).exec();
   }
 }

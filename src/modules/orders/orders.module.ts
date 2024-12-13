@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { OrdersController } from './controllers/orders.controller';
+import { OrdersController } from './orders.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from '../../schemas/orders.schema';
 import { UsersModule } from '../users/user.module';

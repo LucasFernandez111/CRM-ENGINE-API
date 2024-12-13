@@ -18,7 +18,7 @@ export class GoogleApiSheetService {
       const { data } = await google.sheets({ version: 'v4', auth: oAuth2Client }).spreadsheets.get({ spreadsheetId });
       return data.sheets;
     } catch (error) {
-      console.warn(error);
+      console.log(error);
 
       throw ErrorManager.createSignatureError(
         new ErrorManager({ type: 'BAD_REQUEST', message: 'Error al obtener la hoja de calculo' }).message,
@@ -26,9 +26,9 @@ export class GoogleApiSheetService {
     }
   }
 
-  public async getSheetNames(oAuth2Client: OAuth2Client | JWT, spreadsheetId: string) {
+  public async getSheetNames(client: OAuth2Client | JWT, spreadsheetId: string) {
     try {
-      const sheets = await this.getSheets(oAuth2Client, spreadsheetId);
+      const sheets = await this.getSheets(client, spreadsheetId);
 
       const sheetNames = sheets.map((sheet) => sheet.properties.title);
 
@@ -37,6 +37,8 @@ export class GoogleApiSheetService {
       }
       return sheetNames;
     } catch (error) {
+      console.log(error);
+
       throw ErrorManager.createSignatureError(error.message);
     }
   }
