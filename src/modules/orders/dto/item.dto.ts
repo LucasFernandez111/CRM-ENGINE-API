@@ -15,8 +15,4 @@ export class ItemDto {
   @IsNotEmpty()
   @IsNumber()
   readonly price: number;
-
-  @IsOptional()
-  @IsString()
-  readonly description?: string;
 }

@@ -6,16 +6,20 @@ export class FormatterBillReport {
       acc.push([
         {
           text: `${item.quantity} X `,
+          style: 'h2',
           alignment: 'left',
         },
         {
           text: `${item.category} - ${item.subcategory}`,
+          style: 'h2',
+
           alignment: 'center',
         },
-        { text: item.description ? item.description : 'Sin descripcion', alignment: 'center' },
 
         {
           text: `$${item.price}`,
+          style: 'h2',
+
           alignment: 'right',
         },
       ]);

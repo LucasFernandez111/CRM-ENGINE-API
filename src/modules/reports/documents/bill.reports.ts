@@ -57,20 +57,11 @@ const infoOrder = (orderNumber: number, date: string): Content => ({
 
 const infoProducts = (products: ItemDto[]): Content => ({
   margin: [0, 40],
-  stack: [
-    {
-      table: {
-        widths: ['5%', '25%', '60%', '10%'],
-
-        body: FormatterBillReport.formatterTableProducts(products),
-      },
-      layout: 'lightHorizontalLines',
-    },
-  ],
-
-  alignment: 'center',
-
-  columnGap: 30,
+  table: {
+    widths: ['*', '*', '*'],
+    body: FormatterBillReport.formatterTableProducts(products),
+  },
+  layout: 'lightHorizontalLines',
 });
 
 const infoPayment = (methodPayment: string, totalAmount: string): Content => ({

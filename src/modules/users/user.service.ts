@@ -16,16 +16,12 @@ export class UserService {
   public async findById(id: string): Promise<User> {
     return await this.userModel.findById(id).exec();
   }
-  public async update(id_token: string, updateUser: any): Promise<User> {
-    return await this.userModel.findOneAndUpdate({ id_token }, updateUser).exec();
+  public async update(email: string, updateUser: any): Promise<User> {
+    return await this.userModel.findOneAndUpdate({ email }, updateUser).exec();
   }
 
   public async findAll(): Promise<User[]> {
     return await this.userModel.find().exec();
-  }
-
-  public async findUserByTokenId(id_token: string): Promise<User> {
-    return await this.userModel.findOne({ id_token }).exec();
   }
 
   public async findUserByEmail(email: string): Promise<User> {

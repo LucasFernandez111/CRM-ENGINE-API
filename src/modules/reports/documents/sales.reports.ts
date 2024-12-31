@@ -25,7 +25,7 @@ const logo: Content = {
 
 const getMonthName = (monthNumber: number): string => Object.values(Months)[monthNumber - 1];
 
-export const salesReport = (salesData: any, topOrder: OrderTop): TDocumentDefinitions => {
+export const salesReport = (salesData: any, topOrder: OrderTop, salesMonth): TDocumentDefinitions => {
   const { current, periodSales } = salesData.sales;
 
   return {
@@ -39,7 +39,7 @@ export const salesReport = (salesData: any, topOrder: OrderTop): TDocumentDefini
 
       actuallySalesSummary(current),
 
-      monthlySales(periodSales.salesMonth),
+      monthlySales(salesMonth),
 
       // Pedidos Destacados
       topOrders(topOrder),

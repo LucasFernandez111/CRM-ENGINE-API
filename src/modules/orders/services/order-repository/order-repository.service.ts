@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Order } from 'src/schemas/orders.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Aggregate, Model, PipelineStage } from 'mongoose';
-import { IOrderRepository } from '../../interfaces/order-repository.interface';
 import { UpdateOrderDto, CreateOrderDto } from '../../dto';
-import { count } from 'console';
 import { OrderTop } from '../../interfaces/order-top.interface';
 
 @Injectable()
-export class OrderRepository implements IOrderRepository {
+export class OrderRepository {
   constructor(@InjectModel(Order.name) private readonly ordersModel: Model<Order>) {}
 
   public async create(order: CreateOrderDto): Promise<Order> {
@@ -27,27 +25,23 @@ export class OrderRepository implements IOrderRepository {
     return await this.ordersModel.findById(id).exec();
   }
 
-  public async findAllByUserId(userId: string): Promise<Order[]> {
-    return await this.ordersModel.find({ userId }).exec();
+  public async findByEmail(email: string): Promise<Order[]> {
+    return await this.ordersModel.find({ email }).exec();
   }
 
-  public async findAll(): Promise<Order[]> {
-    return await this.ordersModel.find().exec();
-  }
-
-  public async findByDateRange(userId: string, startDate: Date, endDate: Date): Promise<Order[]> {
+  public async findByDateRange(email: string, startDate, endDate): Promise<Order[]> {
     return await this.ordersModel.find({
-      userId,
+      email,
       createdAt: { $gte: startDate, $lte: endDate },
     });
   }
 
-  public async findLastestOrder(userId: string): Promise<Order> {
-    return await this.ordersModel.findOne({ userId }).sort({ createdAt: -1 }).exec();
+  public async findLastestOrder(email: string): Promise<Order> {
+    return await this.ordersModel.findOne({ email }).sort({ createdAt: -1 }).exec();
   }
 
-  public async getInfoTopOrder(userID: string): Promise<Aggregate<OrderTop[] | []>> {
-    const matchStage: PipelineStage.Match = { $match: { userId: userID } };
+  public async getInfoTopOrder(email: string): Promise<Aggregate<OrderTop[] | []>> {
+    const matchStage: PipelineStage.Match = { $match: { email } };
 
     //Agrupar por campos
     const groupStage: PipelineStage.Group = {
@@ -84,7 +78,7 @@ export class OrderRepository implements IOrderRepository {
     return await this.ordersModel.aggregate([matchStage, groupStage, sortStage, limitStage, projectStage]);
   }
 
-  public async getInfoTopOrderToday(userID: string): Promise<Aggregate<OrderTop[] | []>> {
+  public async getInfoTopOrderToday(email: string): Promise<Aggregate<OrderTop[] | []>> {
     const todayStart = new Date(
       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(), 0, 0, 0, 0),
     );
@@ -93,7 +87,7 @@ export class OrderRepository implements IOrderRepository {
     );
 
     const matchStage: PipelineStage.Match = {
-      $match: { userId: userID, createdAt: { $gte: todayStart, $lte: todayEnd } },
+      $match: { email, createdAt: { $gte: todayStart, $lte: todayEnd } },
     };
 
     //Agrupar por campos

@@ -14,8 +14,8 @@ export class ReportsService {
     return this.printer.createPdf(docDefinition);
   }
 
-  public async getSalesReport(sales, topOrder: OrderTop): Promise<PDFKit.PDFDocument> {
-    const docDefinition: TDocumentDefinitions = salesReport(sales, topOrder);
+  public async getSalesReport(sales, topOrder: OrderTop, salesMonth): Promise<PDFKit.PDFDocument> {
+    const docDefinition: TDocumentDefinitions = salesReport(sales, topOrder, salesMonth);
 
     return this.printer.createPdf(docDefinition);
   }

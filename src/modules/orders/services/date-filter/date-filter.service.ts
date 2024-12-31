@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import moment from 'moment';
 
 @Injectable()
 export class DateFilterService {
   constructor() {}
 
   public getMonths(date: Date): Date[] {
-    return Array.from({ length: 12 }, (_, i) => new Date(Date.UTC(date.getFullYear(), i, 1)));
+    const year = date.getFullYear(); // Obtiene el año de la fecha proporcionada
+    return Array.from({ length: 12 }, (_, i) => new Date(year, i, 1));
   }
 
   public getFirstDateOfDay(date: Date): Date {
@@ -15,11 +17,11 @@ export class DateFilterService {
   public getLastDateOfDay(date: Date): Date {
     return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999));
   }
-  public getFirstDateOfMonth(date: Date): Date {
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
+  public getFirstDateOfMonth(date: Date) {
+    return moment().tz('America/Argentina/Buenos_Aires').month(date.getMonth()).startOf('month');
   }
-  public getLastDateOfMonth(date: Date): Date {
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999));
+  public getLastDateOfMonth(date: Date) {
+    return moment(date).tz('America/Argentina/Buenos_Aires').endOf('month').utc();
   }
 
   public getFirstDateOfWeek(date: Date): Date {

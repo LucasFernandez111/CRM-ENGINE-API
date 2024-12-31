@@ -79,6 +79,4 @@ export class GoogleApiSheetService {
       throw ErrorManager.createSignatureError(error.message);
     }
   }
-
-  public async getSheetForServiceAccount(spreadsheetId: string) {}
 }

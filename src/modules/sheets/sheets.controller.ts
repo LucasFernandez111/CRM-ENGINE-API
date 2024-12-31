@@ -24,23 +24,20 @@ export class SheetsController {
     return await this.sheetProductsService.getShipments(req.user.serviceAccount, spreadsheetId);
   }
 
-  // @Put('/:spreadsheetId/:range')
-  // @HttpCode(200)
-  // @UseGuards(JwtAuthGuard)
-  // async updateProductsForRange(
-  //   @Req() req,
-  //   @Param('spreadsheetId') spreadsheetId: string,
-  //   @Param('range') range: string,
-  //   @Body() newProducts: UpdateSheetDTO,
-  // ) {
-  //   const { sub: id_token, accessToken: access_token }: PayloadToken = req.user;
-
-  //   const oAuth2Client = this.oAuth2Service.createOauth2Client({ id_token, access_token });
-  //   return await this.sheetProductsService.updateProductsForRange(
-  //     oAuth2Client,
-  //     spreadsheetId,
-  //     range,
-  //     newProducts.values,
-  //   );
-  // }
+  @UseGuards(ServiceAccountGuard)
+  @Put('/:spreadsheetId/:range')
+  @HttpCode(200)
+  async updateProductsForRange(
+    @Request() req,
+    @Param('spreadsheetId') spreadsheetId: string,
+    @Param('range') range: string,
+    @Body() newProducts: UpdateSheetDTO,
+  ) {
+    return await this.sheetProductsService.updateProductsForRange(
+      req.user.serviceAccount,
+      spreadsheetId,
+      range,
+      newProducts.values,
+    );
+  }
 }

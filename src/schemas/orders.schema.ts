@@ -8,7 +8,7 @@ export type OrderDocument = Order & Document;
 @Schema({ timestamps: true })
 export class Order {
   @Prop({ type: String })
-  userId: string;
+  email: string;
   @Prop({ type: Number })
   orderNumber: number;
 
@@ -35,7 +35,6 @@ export class Order {
     {
       category: { type: String },
       subcategory: { type: String },
-      description: { type: String },
       quantity: { type: Number },
       price: { type: Number },
     },
@@ -43,7 +42,6 @@ export class Order {
   items: {
     category: string;
     subcategory: string;
-    description?: string;
     quantity: number;
     price: number;
   }[];

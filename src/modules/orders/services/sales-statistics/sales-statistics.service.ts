@@ -12,18 +12,16 @@ export class SalesStatisticsService {
     private readonly dateFilterService: DateFilterService,
   ) {}
 
-  public async getSalesByMonth(userId: string, date: Date): Promise<any[]> {
+  public async getSalesByMonth(email: string, date: Date): Promise<any> {
     try {
-      const months = this.dateFilterService.getMonths(date);
+      const everyMonthDate = this.dateFilterService.getMonths(date);
 
-      // Aseguramos que cada promesa sea esperada correctamente
-      const salesMonthPromise = months.map(async (month, i) => ({
+      const salesMonthPromise = everyMonthDate.map(async (month, i) => ({
         month: i + 1,
         dateMonth: this.dateFilterService.toString(month),
-        total: await this.getTotalSalesByMonth(userId, month), // Esperar el valor aquí
+        total: await this.getTotalSalesByMonth(email, month), // Esperar el valor aquí
       }));
 
-      // Esperamos a que todas las promesas se resuelvan
       return await Promise.all(salesMonthPromise);
     } catch (error) {
       throw ErrorManager.createSignatureError(error);
@@ -32,15 +30,16 @@ export class SalesStatisticsService {
 
   /**
    * Get total sales by monthly
-   * @param userId
+   * @param email
    * @param date
    * @returns {Promise<number>} - total sales by monthly
    */
-  public async getTotalSalesByMonth(userId: string, date: Date): Promise<number> {
+  public async getTotalSalesByMonth(email: string, date: Date): Promise<number> {
     try {
-      const orders: Order[] = await this.ordersService.getOrdersByMonth(userId, date);
+      const orders: Order[] = await this.ordersService.getOrdersByMonth(email, date);
 
-      return this.calculateTotalAmounts(orders);
+      const total = this.calculateTotalAmounts(orders);
+      return total;
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
     }
@@ -77,12 +76,12 @@ export class SalesStatisticsService {
 
   /**
    * Get total sales of all orders the user
-   * @param userId
+   * @param email
    * @returns {Promise<number>}  total sales
    */
-  public async getTotalSales(userId: string): Promise<number> {
+  public async getTotalSales(email: string): Promise<number> {
     try {
-      const orders: Order[] = await this.ordersService.getOrders(userId);
+      const orders: Order[] = await this.ordersService.getOrders(email);
 
       return this.calculateTotalAmounts(orders);
     } catch (error) {
@@ -98,19 +97,18 @@ export class SalesStatisticsService {
     };
   }
 
-  public async getDetailsSalesReport(userId: string, date: Date) {
+  public async getDetailsSalesReport(email: string, date: Date) {
     return {
       sales: {
-        total: await this.getTotalSales(userId),
-        current: await this.getTotalSalesSummary(userId, date),
-        periodSales: {
-          salesMonth: await this.getSalesByMonth(userId, date),
-        },
+        total: await this.getTotalSales(email),
+        current: await this.getTotalSalesSummary(email, date),
       },
     };
   }
   private calculateTotalAmounts(orders: Order[]): number {
-    return orders.reduce((acc, order) => acc + order.totalAmount, 0);
+    const total = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+
+    return total;
   }
 
   /**

@@ -13,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ServiceAccountGuard } from 'src/modules/auth/guard/service-account.guard';
-import { PayloadToken } from 'src/modules/auth/interfaces/payload-token.interface';
 import { OrdersService } from './services/orders.service';
 import { SalesStatisticsService } from './services/sales-statistics/sales-statistics.service';
 import { StatisticsOrderService } from './services/statistics-order.service';
@@ -27,10 +26,16 @@ export class OrdersController {
     private readonly statisticsOrderService: StatisticsOrderService,
     private readonly statisticsSalesService: SalesStatisticsService,
   ) {}
+
+  @UseGuards(ServiceAccountGuard)
+  @Get()
+  async getOrders(@Request() req) {
+    return await this.ordersService.getOrders(req.user.serviceAccount.email);
+  }
   @UseGuards(ServiceAccountGuard)
   @Post()
   async createOrder(@Request() req, @Body() order: CreateOrderDto): Promise<any> {
-    return this.ordersService.createOrder(req.user.serviceAccount.email, order);
+    return await this.ordersService.createOrder(req.user.serviceAccount.email, order);
   }
 
   @HttpCode(200)
@@ -38,12 +43,16 @@ export class OrdersController {
   async sendOrderToWhatsApp(@Body() order: CreateOrderDto, @Param('id') userId: string) {
     return this.ordersService.createOrder(userId, order);
   }
-
+  @UseGuards(ServiceAccountGuard)
   @Get('range')
   async getOrdersByDateRange(@Query('startDate') startDate: string, @Query('endDate') endDate: string, @Req() req) {
-    const { sub: userId }: PayloadToken = req.user;
-
-    return { orders: await this.ordersService.getOrdersByRange(userId, new Date(startDate), new Date(endDate)) };
+    return {
+      orders: await this.ordersService.getOrdersByRange(
+        req.user.serviceAccount.email,
+        new Date(startDate),
+        new Date(endDate),
+      ),
+    };
   }
 
   @Delete(':id')
@@ -59,6 +68,12 @@ export class OrdersController {
   @Get('statistics/sales')
   async getSummarySales(@Req() req) {
     return this.statisticsSalesService.getDetailsSalesReport(req.user.serviceAccount.email, new Date());
+  }
+
+  @UseGuards(ServiceAccountGuard)
+  @Get('statistics/sales/months')
+  async getSalesMonths(@Req() req) {
+    return this.statisticsSalesService.getSalesByMonth(req.user.serviceAccount.email, new Date());
   }
   @UseGuards(ServiceAccountGuard)
   @Get('statistics/top-order')
